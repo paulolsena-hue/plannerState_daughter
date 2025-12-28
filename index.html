@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner OS - Student Edition</title>
+    
+    <!-- 1. CDNs para React e ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- 2. CDN para Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 3. CDN para Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 4. Biblioteca html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- 5. Biblioteca Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- ESTILOS DO PLANNER -->
+    <style>
+        :root {
+            --sidebar-width: 500px;
+            --bg-app: #f3f4f6;
+            --bg-panel: #ffffff;
+            --primary: #000000;
+            --text: #333;
+            --block-gray: #E0E0E0;
+            --block-dark: #CCCCCC;
+            --alert-green: #2ecc71;
+            --alert-yellow: #f1c40f;
+            --line-pattern: repeating-linear-gradient(transparent, transparent 29px, #ccc 30px);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            overflow: hidden;
+        }
+
+        /* Alterado para flex por padrão já que não há tela de login */
+        #planner-app {
+            display: flex; 
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+        }
+
+        [contenteditable="true"]:focus {
+            outline: 2px solid #e5e7eb;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .paper { 
+            background: white; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: none; 
+            position: relative; 
+            margin-top: 20px;    
+            margin-bottom: 100px; 
+        }
+        .paper.active { display: block; }
+        .a4-portrait { width: 210mm; height: 297mm; padding: 15mm; box-sizing: border-box; }
+        .a4-landscape { width: 297mm; height: 210mm; padding: 10mm; box-sizing: border-box; }
+
+        @media (max-width: 1024px) { 
+            .main-scroll-area { padding: 10px !important; }
+            .paper { margin: 20px auto 100px auto; }
+        }
+
+        .daily-grid { display: flex; flex-direction: column; height: 100%; }
+        .daily-header { display: flex; justify-content: space-between; border-bottom: 3px solid black; padding-bottom: 10px; margin-bottom: 15px; }
+        .daily-date-group { width: 40%; }
+        .daily-prio-group { width: 55%; }
+        .big-day-label { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin-top: 5px; }
+        .prio-row { display: flex; align-items: center; margin-bottom: 6px; }
+        .prio-check { width: 18px; height: 18px; border: 2px solid black; margin-right: 8px; cursor: pointer; flex-shrink: 0; }
+        .prio-check.checked { background: black; }
+        .prio-input { border: none; border-bottom: 1px solid #ccc; width: 100%; font-family: inherit; font-size: 0.9rem; outline: none; }
+        .prio-input.done { text-decoration: line-through; color: #aaa; }
+        .daily-body { display: flex; flex-grow: 1; gap: 20px; }
+        .col-time { width: 60%; border-right: 1px solid #ccc; padding-right: 15px; display: flex; flex-direction: column; }
+        .col-dump { width: 40%; display: flex; flex-direction: column; }
+        .time-header { background: black; color: white; text-align: center; font-weight: bold; font-size: 0.8rem; padding: 2px; margin-bottom: 5px; }
+        .timeline-box { flex-grow: 1; position: relative; display: flex; flex-direction: column; }
+        .time-slot { flex: 1; border-bottom: 1px solid #e0e0e0; display: flex; position: relative; }
+        .ts-label { width: 40px; font-size: 0.75rem; font-weight: bold; color: #555; text-align: right; padding-right: 8px; border-right: 1px solid #ccc; padding-top: 2px; }
+        .block-routine { position: absolute; left: 45px; right: 0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; border-left: 4px solid #666; opacity: 0.95; z-index: 5; pointer-events: none; }
+        .block-grey { background-color: var(--block-gray); color: #333; }
+        .block-dark { background-color: #333; color: #fff; border-left-color: #000; }
+        .block-alert { background-color: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        .dump-lines { flex-grow: 1; background-image: var(--line-pattern); border-top: 1px solid #ccc; line-height: 30px; font-size: 0.9rem; padding-left: 5px; }
+        .daily-footer { border-top: 2px solid black; padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; font-size: 0.8rem; }
+        .bio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; }
+
+        .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); height: 85%; border-left: 1px solid #eee; border-top: 1px solid #000; }
+        .wk-col { border-right: 1px solid #000; display: flex; flex-direction: column; position: relative; }
+        .wk-col:last-child { border-right: none; }
+        .wk-header { text-align: center; padding: 5px; border-bottom: 1px solid #000; background: #fff; font-weight: bold; font-size: 0.8rem; }
+        .wk-body { flex-grow: 1; position: relative; background-image: repeating-linear-gradient(transparent, transparent 19px, #f8f8f8 20px); font-size: 0.8rem; line-height: 20px; }
+        .wk-footer { height: 25px; border-top: 1px solid #000; display: flex; justify-content: space-around; align-items: center; font-size: 0.7rem; }
+
+        .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(5, 1fr); height: 80%; border: 1px solid #000; }
+        .m-head { background: #eee; text-align: center; font-weight: bold; padding: 5px; border-bottom: 2px solid #000; font-size: 0.8rem; }
+        .m-cell { border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 5px; position: relative; display: flex; flex-direction: column; }
+        .m-cell:nth-child(7n) { border-right: none; background: #fcfcfc; }
+        .m-content { flex-grow: 1; font-size: 0.75rem; }
+        .event-tag { font-size: 0.6rem; padding: 2px; margin-top: 2px; font-weight: bold; }
+        .tag-shift { background: #333; color: white; }
+        .tag-crit { background: #c0392b; color: white; }
+
+        .proj-layout { display: flex; flex-direction: column; height: 100%; }
+        .proj-head { border-bottom: 3px solid black; padding-bottom: 10px; margin-bottom: 20px; }
+        .proj-input-title { font-size: 1.8rem; font-weight: 900; text-transform: uppercase; width: 100%; border: none; border-bottom: 1px dotted #ccc; }
+        .proj-split { display: flex; flex-grow: 1; gap: 20px; }
+        .proj-col-l { width: 40%; border-right: 1px solid #ccc; padding-right: 15px; display: flex; flex-direction: column; }
+        .proj-col-r { width: 60%; display: flex; flex-direction: column; }
+        .proj-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .btn-add-line { width: 100%; padding: 5px; background: #f0f0f0; text-align: center; border: 1px dashed #999; margin-top: 10px; cursor: pointer; font-size: 0.7rem; }
+
+        .ctx-container { display: flex; flex-direction: column; gap: 20px; height: 100%; }
+        .ctx-box { border: 1px solid #ccc; flex: 1; display: flex; flex-direction: column; }
+        .ctx-title { background: #000; color: white; padding: 5px 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
+        .ctx-list { padding: 10px; flex-grow: 1; overflow: hidden; }
+        .context-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; border-bottom: 1px dotted #eee; }
+        .ctx-input { flex-grow: 1; border: none; background: transparent; font-size: 0.9rem; outline: none; padding: 4px 0; min-width: 50px; }
+        .ctx-del-btn { color: #ccc; cursor: pointer; padding: 4px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; }
+        .ctx-del-btn:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); border-radius: 4px; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: white; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; text-align: center; }
+        .modal img { max-width: 100%; border: 1px solid #ccc; margin: 10px 0; }
+
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .alert-card { border-left-width: 8px; padding: 16px; }
+        .alert-title { font-size: 1.1rem; font-weight: 900; }
+        .alert-content { font-size: 1rem; font-weight: 700; color: #222; }
+
+        .task-selector { appearance: none; background-color: #f3f4f6; border: 1px solid transparent; border-radius: 12px; font-size: 0.7rem; font-weight: bold; color: #6b7280; padding: 2px 6px; cursor: pointer; text-align: center; transition: all 0.2s; }
+        .task-selector:hover { border-color: #d1d5db; }
+        .task-selector:focus { outline: none; }
+        .aging-badge { font-size: 0.65rem; color: #ef4444; font-weight: 800; margin-left: 4px; animation: pulse-text 2s infinite; }
+        @keyframes pulse-text { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen overflow-hidden">
+
+    <!-- APP CONTAINER -->
+    <div id="planner-app">
+        
+        <header class="h-16 bg-gray-900 text-white flex items-center justify-between px-4 shadow-lg z-50 shrink-0">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-700 rounded-md transition-colors focus:outline-none">
+                    <i data-lucide="menu" class="w-8 h-8"></i>
+                </button>
+                <div class="font-black text-2xl tracking-wider hidden sm:block">PLANNER <span class="text-gray-400">OS</span> <span class="text-xs bg-gray-700 px-2 py-1 rounded ml-2 uppercase">Student Edition</span></div>
+            </div>
+            
+            <div class="flex gap-2 overflow-x-auto hide-scroll px-2 items-center flex-1 sm:flex-none justify-start sm:justify-end">
+                <button title="Diário" class="nav-top-btn active flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('daily')">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                </button>
+                <button title="Semanal" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('weekly')">
+                    <i data-lucide="calendar-range" class="w-5 h-5"></i>
+                </button>
+                <button title="Mensal" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('monthly')">
+                    <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                </button>
+                <button title="Anual" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('annual')">
+                    <i data-lucide="trending-up" class="w-5 h-5"></i>
+                </button>
+                <button title="Projetos" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('projects')">
+                    <i data-lucide="rocket" class="w-5 h-5"></i>
+                </button>
+                <button title="Contexto" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('contexts')">
+                    <i data-lucide="list-todo" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden relative">
+            <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+
+            <nav id="sidebar" class="sidebar-transition absolute lg:relative bg-white border-r border-gray-200 h-full z-40 transform -translate-x-full lg:translate-x-0 flex flex-col shadow-xl lg:shadow-none" style="width: var(--sidebar-width);">
+                <div class="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between lg:hidden">
+                    <span class="font-black text-xl text-gray-800">ALERTAS & HUD</span>
+                    <button onclick="toggleSidebar()" class="text-gray-600 hover:text-black"><i data-lucide="x" class="w-8 h-8"></i></button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                    <div id="alert-critical-card" class="bg-gray-50 border-l-4 border-gray-300 p-3 rounded-r-md shadow-sm transition-all duration-300 opacity-50 alert-card">
+                        <div id="alert-critical-header" class="flex items-center gap-3 text-gray-700 alert-title mb-3">
+                            <i data-lucide="alert-triangle" class="w-6 h-6"></i> Radar de Eventos
+                        </div>
+                        <div id="alert-critical-content" class="alert-content text-gray-500 italic space-y-2">
+                            Sem eventos registrados.
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 border-l-4 border-green-500 p-3 rounded-r-md shadow-sm alert-card">
+                        <div class="flex items-center gap-3 text-green-800 alert-title mb-3">
+                            <i data-lucide="target" class="w-6 h-6"></i> Prioridades do Dia
+                        </div>
+                        <div id="alert-priority-content" class="alert-content text-gray-700 italic">Defina no Diário...</div>
+                    </div>
+
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-r-md shadow-sm alert-card">
+                        <div class="flex items-center gap-3 text-yellow-800 alert-title mb-3">
+                            <i data-lucide="alert-circle" class="w-6 h-6"></i> Risco Procrastinação
+                        </div>
+                        <div id="alert-risk-content" class="alert-content text-gray-700 italic">Nenhum risco.</div>
+                    </div>
+
+                    <div class="bg-rose-50 border-rose-500 rounded-r-md shadow-sm alert-card">
+                        <div class="flex items-center gap-3 text-rose-800 alert-title mb-3">
+                            <i data-lucide="siren" class="w-6 h-6"></i> Importante & Urgente
+                        </div>
+                        <div id="alert-imp-urg-content" class="alert-content text-gray-700 italic">Vazio.</div>
+                    </div>
+
+                    <div class="bg-indigo-50 border-indigo-500 rounded-r-md shadow-sm alert-card">
+                        <div class="flex items-center gap-3 text-indigo-800 alert-title mb-3">
+                            <i data-lucide="calendar-clock" class="w-6 h-6"></i> Importante & Ñ Urgente
+                        </div>
+                        <div id="alert-imp-not-urg-content" class="alert-content text-gray-700 italic">Vazio.</div>
+                    </div>
+                </div>
+
+                <div class="p-6 border-t border-gray-200 bg-gray-50">
+                    <button onclick="generateImage()" class="w-full bg-black text-white py-4 rounded-xl font-black shadow-lg hover:bg-gray-800 transition-colors flex flex-col items-center justify-center action-btn">
+                        <span class="flex items-center gap-3"><i data-lucide="camera" class="w-6 h-6"></i> GERAR IMAGEM</span>
+                        <span class="text-xs font-bold opacity-80 mt-1 uppercase tracking-wider">A4 (Alta Resolução)</span>
+                    </button>
+                </div>
+            </nav>
+
+            <main class="main-scroll-area flex-1 bg-gray-200 overflow-auto p-4 lg:p-8 flex justify-center items-start relative transition-all">
+                
+                <!-- DIÁRIO -->
+                <div id="view-daily" class="paper a4-portrait active" data-orientation="portrait">
+                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 shadow-sm mb-4">
+                        <button onclick="changeDay(-1)" class="p-1 hover:bg-gray-200 rounded transition-colors"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                        <input type="date" id="daily-date" class="border border-gray-300 rounded px-2 py-1 text-sm font-bold" onchange="loadDayFromInput()">
+                        <button onclick="changeDay(1)" class="p-1 hover:bg-gray-200 rounded transition-colors"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                        <button onclick="goToToday()" class="px-3 py-1 text-xs bg-black text-white rounded font-bold ml-2 hover:bg-gray-800 transition-colors">Hoje</button>
+                        <button class="px-2 py-1 text-xs bg-red-100 text-red-700 border border-red-200 rounded font-bold ml-auto hover:bg-red-200" onclick="resetDaily()">🗑️ Limpar</button>
+                    </div>
+
+                    <div class="flex items-center gap-2 mb-4">
+                         <label for="template-select" class="text-xs font-bold text-gray-600 uppercase">Bloco de Rotina:</label>
+                         <select id="template-select" onchange="setTemplate(this.value)" class="border border-gray-300 rounded px-2 py-1 text-sm font-bold bg-white focus:outline-none focus:ring-1 focus:ring-black flex-1">
+                             <option value="" disabled selected>Escolher rotina sugerida...</option>
+                             <option value="S-foco">Bloco de Foco (4h Concentração)</option>
+                             <option value="S-rotina">Rotina Padrão (Manhã/Tarde/Noite)</option>
+                             <option value="S-descanso">Modo Descanso / Offline</option>
+                         </select>
+                    </div>
+
+                    <div class="daily-grid">
+                        <div id="page-crit-banner" class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 text-center font-bold text-sm mb-4 hidden rounded"></div>
+                        <div class="daily-header">
+                            <div class="daily-date-group">
+                                <div id="day-label" class="big-day-label">CARREGANDO...</div>
+                            </div>
+                            <div class="daily-prio-group">
+                                <div class="text-xs font-black uppercase border-b-2 border-black mb-1">Top 3 do Dia</div>
+                                <div class="prio-row"><div class="prio-check" onclick="togglePrio(1, this)"></div><input id="p1" class="prio-input" placeholder="1. Inegociável" oninput="saveDay()"></div>
+                                <div class="prio-row"><div class="prio-check" onclick="togglePrio(2, this)"></div><input id="p2" class="prio-input" placeholder="2. Importante" oninput="saveDay()"></div>
+                                <div class="prio-row"><div class="prio-check" onclick="togglePrio(3, this)"></div><input id="p3" class="prio-input" placeholder="3. Desejável" oninput="saveDay()"></div>
+                            </div>
+                        </div>
+                        <div class="daily-body">
+                            <div class="col-time">
+                                <div class="time-header">AGENDA (07:00 - 23:00)</div>
+                                <div id="daily-timeline" class="timeline-box"></div>
+                            </div>
+                            <div class="col-dump">
+                                <div class="font-black border-b-2 border-black mb-2">BRAIN DUMP 🧠</div>
+                                <div id="daily-mode-badge" class="border-2 border-black p-1 text-center font-bold mb-2 hidden bg-white">🎯 FOCO TOTAL</div>
+                                <div id="daily-dump" class="dump-lines" contenteditable="true" oninput="saveDay()"></div>
+                            </div>
+                        </div>
+                        <div class="daily-footer">
+                            <div class="bio-item" onclick="toggleBio('water')">💧 Hidratação: <span id="bio-water">○○○○○ ○○○○○</span></div>
+                            <div class="bio-item" onclick="toggleBio('sleep')">💤 Sono: <span id="bio-sleep">____h</span></div>
+                            <div class="bio-item" onclick="toggleBio('workout')">🏋️ Treino: <span id="bio-workout">[ ]</span></div>
+                            <div class="bio-item" onclick="toggleBio('meds')">💊 Rotina: <span id="bio-meds">[ ]</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-weekly" class="paper a4-landscape" data-orientation="landscape">
+                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 shadow-sm mb-4">
+                        <input type="date" id="week-start" onchange="renderWeekly()" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                    </div>
+                    <h1 class="text-2xl font-bold border-b-4 border-black mb-2 pb-1 uppercase">Planejamento Semanal</h1>
+                    <div id="week-label" class="font-bold mb-2 text-gray-600"></div>
+                    <div id="week-grid" class="week-grid"></div>
+                </div>
+
+                <div id="view-monthly" class="paper a4-landscape" data-orientation="landscape">
+                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 shadow-sm mb-4 overflow-x-auto">
+                        <input type="date" id="month-start" value="2026-01-01" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                        <button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs font-bold" onclick="renderMonthly()">Atualizar</button>
+                        <div class="border-l border-gray-400 pl-2 flex items-center gap-2">
+                            <input type="date" id="new-crit-date" class="border border-gray-300 rounded px-1 py-1 text-xs">
+                            <input type="text" id="new-crit-desc" placeholder="Evento..." class="border border-gray-300 rounded px-1 py-1 text-xs w-32">
+                            <button class="px-3 py-1 bg-black text-white rounded text-xs font-bold" onclick="addCritical()">+ Alerta</button>
+                        </div>
+                    </div>
+                    <h1 id="month-title" class="text-3xl font-black uppercase mb-2">MÊS</h1>
+                    <div id="month-grid" class="month-grid"></div>
+                </div>
+
+                <div id="view-annual" class="paper a4-landscape" data-orientation="landscape">
+                    <h1 class="border-b-4 border-black mb-4 text-2xl font-black uppercase">Roadmap Anual <span id="year-disp">2026</span></h1>
+                    <input type="number" id="year-val" value="2026" class="mb-4 border p-1 rounded text-sm w-24" onchange="renderAnnual()">
+                    <div class="grid grid-cols-4 gap-4 h-[80%]">
+                        <div id="q1" class="flex flex-col gap-2"></div>
+                        <div id="q2" class="flex flex-col gap-2"></div>
+                        <div id="q3" class="flex flex-col gap-2"></div>
+                        <div id="q4" class="flex flex-col gap-2"></div>
+                    </div>
+                </div>
+
+                <div id="view-projects" class="paper a4-portrait" data-orientation="portrait">
+                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 shadow-sm mb-4">
+                        <button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs font-bold hover:bg-gray-100 transition-colors" onclick="newProject()">+ Novo</button>
+                        <select id="proj-select" onchange="loadProject(this.value)" class="border border-gray-300 rounded px-2 py-1 text-sm bg-white"></select>
+                    </div>
+                    <div class="proj-layout">
+                        <input id="proj-title" class="proj-input-title" value="OBJETIVO" oninput="saveProj()">
+                        <div class="mt-2 bg-gray-100 p-2 border-l-4 border-black mb-4">
+                            <div class="text-[10px] font-bold uppercase">Motivação:</div>
+                            <input id="proj-why" class="w-full border-none bg-transparent italic text-sm focus:outline-none" oninput="saveProj()">
+                        </div>
+                        <div class="proj-split">
+                            <div class="proj-col-l">
+                                <div class="font-black border-b-2 border-black mb-1 text-sm">ETAPAS</div>
+                                <div id="proj-phases"></div>
+                                <div class="btn-add-line" onclick="addProjItem('phase')">+ Etapa</div>
+                            </div>
+                            <div class="proj-col-r">
+                                <div class="font-black border-b-2 border-black mb-1 text-sm">PRÓXIMAS AÇÕES</div>
+                                <div id="proj-actions"></div>
+                                <div class="btn-add-line" onclick="addProjItem('action')">+ Ação</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-contexts" class="paper a4-portrait" data-orientation="portrait">
+                    <div class="flex justify-end gap-2 mb-4 bg-gray-50 p-2 rounded border border-gray-200 shadow-sm">
+                        <button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs font-bold text-blue-700 hover:bg-blue-50" onclick="clearDoneContexts()">Limpar Feitos</button>
+                    </div>
+                    <h1 class="border-b-4 border-black mb-4 pb-2 text-2xl font-black">LISTAS DE CAPTURA</h1>
+                    <div class="ctx-container">
+                        <div class="ctx-box">
+                            <div class="ctx-title bg-rose-800 text-white"><span>🔥 Urgente</span><button class="bg-rose-950 px-2 rounded" onclick="addContextItem('imp_urg')">+</button></div>
+                            <div id="ctx-imp_urg" class="ctx-list"></div>
+                        </div>
+                        <div class="ctx-box">
+                            <div class="ctx-title bg-indigo-800 text-white"><span>📅 Importante</span><button class="bg-indigo-950 px-2 rounded" onclick="addContextItem('imp_not_urg')">+</button></div>
+                            <div id="ctx-imp_not_urg" class="ctx-list"></div>
+                        </div>
+                        <div class="ctx-box">
+                            <div class="ctx-title bg-black text-white"><span>🛍️ Compras</span><button class="bg-gray-800 px-2 rounded" onclick="addContextItem('compras')">+</button></div>
+                            <div id="ctx-compras" class="ctx-list"></div>
+                        </div>
+                        <div class="ctx-box">
+                            <div class="ctx-title bg-black text-white"><span>🏠 Pessoal / Casa</span><button class="bg-gray-800 px-2 rounded" onclick="addContextItem('casa')">+</button></div>
+                            <div id="ctx-casa" class="ctx-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="modal" class="modal" onclick="closeModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <h3 class="font-bold text-lg mb-2">Imagem Gerada</h3>
+            <img id="img-preview" src="" class="mx-auto shadow-md">
+            <br>
+            <a id="dl-link" class="inline-block bg-black text-white px-6 py-2 rounded font-bold" style="text-decoration:none;">⬇️ Baixar</a>
+            <button class="ml-4 px-4 py-2 border rounded hover:bg-gray-100" onclick="closeModal()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- LOGICA DO PLANNER -->
+    <script>
+        // --- 1. STATE (RESTAURADO E ISOLADO) ---
+        let state;
+        const STATE_KEY = 'plannerState_daughter';
+        
+        function getLocalTodayISO() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset();
+            const localDate = new Date(now.getTime() - (offset * 60 * 1000));
+            return localDate.toISOString().split('T')[0];
+        }
+
+        try {
+            state = JSON.parse(localStorage.getItem(STATE_KEY));
+        } catch (e) { state = null; }
+
+        const defaultProjects = {
+            p2026: { title: "OBJETIVOS 2026", why: "Evolução e Clareza", phases: ["Planejamento"], actions: [{text: "Definir prioridades", created: Date.now()}] },
+            self: { title: "DESENVOLVIMENTO", why: "Habilidades", phases: ["Cursos"], actions: [{text: "Leitura semanal", created: Date.now()}] },
+            risk: { title: "RISCO PROCRASTINAÇÃO", why: "Action imediata", phases: ["Urgente"], actions: [{text: "Resolver pendência", created: Date.now()}] }
+        };
+
+        if (!state) {
+            state = {
+                activeView: 'view-daily',
+                events: [],
+                projects: defaultProjects,
+                currentProjId: 'p2026',
+                dailyLogs: {},
+                currentDateStr: getLocalTodayISO(),
+                contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] }
+            };
+        }
+
+        function saveState() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
+
+        // --- 2. NAVEGAÇÃO ---
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+        
+        function nav(viewId) {
+            if(window.innerWidth < 1024 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+
+            document.querySelectorAll('.paper').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-top-btn').forEach(el => el.classList.remove('bg-gray-800', 'text-white'));
+            
+            const target = 'view-' + viewId;
+            const el = document.getElementById(target);
+            if(el) el.classList.add('active');
+            state.activeView = target;
+            saveState();
+
+            if(viewId === 'daily') loadDay(state.currentDateStr);
+            if(viewId === 'weekly') renderWeekly();
+            if(viewId === 'monthly') renderMonthly();
+            if(viewId === 'annual') renderAnnual();
+            if(viewId === 'projects') renderProj();
+            if(viewId === 'contexts') initContexts();
+        }
+
+        // --- 3. HUD ---
+        function updateHUD() {
+            const data = state.dailyLogs[state.currentDateStr] || { p1:'', p2:'', p3:'' };
+            const prios = [data.p1, data.p2, data.p3].filter(x => x).map(x => `• ${x}`).join('<br>');
+            document.getElementById('alert-priority-content').innerHTML = prios || 'Defina no Diário...';
+
+            const riskProj = state.projects['risk'];
+            const risks = riskProj.actions.slice(0,3).map(a => `• ${a.text}`).join('<br>');
+            document.getElementById('alert-risk-content').innerHTML = risks || 'Nenhum risco.';
+
+            const urg = (state.contexts.imp_urg || []).filter(i => !i.done).slice(0,3).map(i => `🔥 ${i.text}`).join('<br>');
+            document.getElementById('alert-imp-urg-content').innerHTML = urg || 'Vazio.';
+
+            const nurg = (state.contexts.imp_not_urg || []).filter(i => !i.done).slice(0,3).map(i => `📅 ${i.text}`).join('<br>');
+            document.getElementById('alert-imp-not-urg-content').innerHTML = nurg || 'Vazio.';
+
+            checkCritical();
+        }
+
+        // --- 4. RADAR ---
+        function checkCritical() {
+            const today = new Date(state.currentDateStr + "T12:00:00");
+            const alertContent = document.getElementById('alert-critical-content');
+            const alertBox = document.getElementById('alert-critical-card');
+            if(!alertContent) return;
+
+            const upcoming = state.events
+                .map(e => {
+                    const eDate = new Date(e.date + "T12:00:00");
+                    const diffDays = Math.ceil((eDate - today) / (1000 * 60 * 60 * 24));
+                    return { ...e, diffDays };
+                })
+                .filter(e => e.diffDays >= 0)
+                .sort((a,b) => a.diffDays - b.diffDays);
+
+            if(upcoming.length > 0) {
+                alertContent.innerHTML = upcoming.map(ev => `
+                    <div class="mb-2 border-b pb-2 last:border-0">
+                        <div class="flex justify-between text-[10px] font-bold"><span>${ev.date}</span><span>${ev.diffDays === 0 ? 'HOJE' : ev.diffDays+'d'}</span></div>
+                        <div class="text-sm font-black">${ev.desc}</div>
+                    </div>`).join('');
+                alertBox.classList.remove('opacity-50');
+            } else {
+                alertContent.innerText = 'Sem eventos próximos.';
+                alertBox.classList.add('opacity-50');
+            }
+        }
+
+        // --- 5. LÓGICA DIÁRIA ---
+        function loadDay(dateStr) {
+            state.currentDateStr = dateStr;
+            const dateInput = document.getElementById('daily-date');
+            if(dateInput) dateInput.value = dateStr;
+
+            const data = state.dailyLogs[dateStr] || { p1:'', p2:'', p3:'', dump:'', timeline:{}, bio:{water:0, sleep:'', workout:false, meds:false} };
+            
+            document.getElementById('p1').value = data.p1 || '';
+            document.getElementById('p2').value = data.p2 || '';
+            document.getElementById('p3').value = data.p3 || '';
+            document.getElementById('daily-dump').innerText = data.dump || '';
+            
+            const tl = document.getElementById('daily-timeline');
+            tl.innerHTML = '';
+            for(let h=7; h<=23; h++) {
+                const hour = h.toString().padStart(2, '0');
+                const content = (data.timeline && data.timeline[hour]) || '';
+                tl.innerHTML += `<div class="time-slot"><div class="ts-label">${hour}:00</div><div class="flex-1 px-2" contenteditable="true" oninput="saveDay()">${content}</div></div>`;
+            }
+            
+            const b = data.bio || {water:0, sleep:'', workout:false, meds:false};
+            document.getElementById('bio-water').innerText = '●'.repeat(b.water) + '○'.repeat(10-b.water);
+            document.getElementById('bio-sleep').innerText = (b.sleep || '____') + 'h';
+            document.getElementById('bio-workout').innerText = b.workout ? '[X]' : '[ ]';
+            document.getElementById('bio-meds').innerText = b.meds ? '[X]' : '[ ]';
+
+            // ATUALIZAÇÃO DO RÓTULO DO DIA (CORRIGIDO)
+            const dayNames = ['DOMINGO','SEGUNDA-FEIRA','TERÇA-FEIRA','QUARTA-FEIRA','QUINTA-FEIRA','SEXTA-FEIRA','SÁBADO'];
+            const d = new Date(dateStr + "T12:00:00");
+            const labelEl = document.getElementById('day-label');
+            if(labelEl) labelEl.innerText = dayNames[d.getDay()];
+
+            updateHUD();
+        }
+
+        function saveDay() {
+            const dateStr = state.currentDateStr;
+            if(!state.dailyLogs[dateStr]) state.dailyLogs[dateStr] = { timeline:{}, bio:{water:0, sleep:'', workout:false, meds:false} };
+            const d = state.dailyLogs[dateStr];
+            d.p1 = document.getElementById('p1').value;
+            d.p2 = document.getElementById('p2').value;
+            d.p3 = document.getElementById('p3').value;
+            d.dump = document.getElementById('daily-dump').innerText;
+            document.querySelectorAll('.time-slot').forEach(s => {
+                const h = s.querySelector('.ts-label').innerText.split(':')[0];
+                d.timeline[h] = s.querySelector('[contenteditable]').innerText;
+            });
+            saveState(); updateHUD();
+        }
+
+        function toggleBio(type) {
+            if(!state.dailyLogs[state.currentDateStr]) saveDay();
+            const d = state.dailyLogs[state.currentDateStr];
+            if(type === 'water') d.bio.water = (d.bio.water + 1) % 11;
+            else if(type === 'workout') d.bio.workout = !d.bio.workout;
+            else if(type === 'meds') d.bio.meds = !d.bio.meds;
+            else if(type === 'sleep') d.bio.sleep = prompt("Horas de sono:", d.bio.sleep || "");
+            saveState(); loadDay(state.currentDateStr);
+        }
+
+        function setTemplate(type) {
+            document.querySelectorAll('.block-routine').forEach(e => e.remove());
+            const tl = document.getElementById('daily-timeline');
+            const add = (s, e, txt, style='grey') => {
+                const total = 17; const top = ((s-7)/total)*100; const h = ((e-s)/total)*100;
+                const div = document.createElement('div');
+                div.className = `block-routine block-${style}`; div.innerText = txt;
+                div.style.top = `calc(${top}% + 1px)`; div.style.height = `calc(${h}% - 2px)`;
+                tl.appendChild(div);
+            };
+            if(type === 'S-foco') add(8, 12, "BLOCO DE FOCO 🧠", "alert");
+            if(type === 'S-rotina') { add(9, 12, "ROTINA MANHÃ"); add(14, 18, "ROTINA TARDE"); add(20, 22, "PLANEJAMENTO / LEITURA", "dark"); }
+            if(type === 'S-descanso') add(8, 23, "MODO RECUPERAÇÃO 🌊", "grey");
+        }
+
+        // --- 6. PROJETOS ---
+        function renderProj() {
+            const p = state.projects[state.currentProjId];
+            document.getElementById('proj-title').value = p.title;
+            document.getElementById('proj-why').value = p.why;
+            document.getElementById('proj-phases').innerHTML = (p.phases || []).map((x, i) => `<div class="proj-item"><input class="prio-input" value="${x}" oninput="state.projects['${state.currentProjId}'].phases[${i}]=this.value;saveState()"></div>`).join('');
+            document.getElementById('proj-actions').innerHTML = (p.actions || []).map((a, i) => {
+                const age = Math.floor((Date.now() - (a.created || Date.now())) / 86400000);
+                return `<div class="proj-item"><div class="prio-check" onclick="this.classList.toggle('checked')"></div><input class="prio-input flex-1" value="${a.text}" oninput="state.projects['${state.currentProjId}'].actions[${i}].text=this.value;saveState()">${age > 1 ? '<span class="aging-badge">+'+age+'d</span>' : ''}</div>`;
+            }).join('');
+        }
+
+        function addProjItem(type) {
+            const p = state.projects[state.currentProjId];
+            if(type==='phase') p.phases.push(""); else p.actions.push({text:"", created:Date.now()});
+            saveState(); renderProj();
+        }
+
+        function loadProject(id) { state.currentProjId = id; renderProj(); }
+
+        function newProject() {
+            const name = prompt("Nome do Objetivo:"); if(!name) return;
+            const id = 'p_' + Date.now();
+            state.projects[id] = { title: name, why: "", phases: ["Etapa 1"], actions: [{text: "Primeira ação", created: Date.now()}] };
+            saveState(); refreshProjSelect(); loadProject(id);
+        }
+
+        function refreshProjSelect() {
+            const ps = document.getElementById('proj-select');
+            if(!ps) return;
+            ps.innerHTML = '';
+            Object.entries(state.projects).forEach(([id, p]) => ps.innerHTML += `<option value="${id}">${p.title}</option>`);
+            ps.value = state.currentProjId;
+        }
+
+        function saveProj() {
+            const p = state.projects[state.currentProjId];
+            p.title = document.getElementById('proj-title').value;
+            p.why = document.getElementById('proj-why').value;
+            saveState();
+        }
+
+        // --- 7. CONTEXTOS ---
+        function initContexts() {
+            ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => {
+                const el = document.getElementById('ctx-'+k);
+                if(!el) return;
+                el.innerHTML = (state.contexts[k] || []).map((item, idx) => `
+                    <div class="context-item">
+                        <div class="prio-check ${item.done ? 'checked' : ''}" onclick="state.contexts['${k}'][${idx}].done=!state.contexts['${k}'][${idx}].done;saveState();initContexts()"></div>
+                        <input class="ctx-input" value="${item.text}" oninput="state.contexts['${k}'][${idx}].text=this.value;saveState()">
+                    </div>`).join('');
+            });
+        }
+        function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
+        function clearDoneContexts() { Object.keys(state.contexts).forEach(k => state.contexts[k] = state.contexts[k].filter(i => !i.done)); saveState(); initContexts(); }
+
+        // --- 8. OUTROS ---
+        function renderWeekly() {
+            const grid = document.getElementById('week-grid'); if(!grid) return;
+            grid.innerHTML = '';
+            const val = document.getElementById('week-start').value || getLocalTodayISO();
+            const d = new Date(val + "T12:00:00");
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            const start = new Date(d.setDate(diff));
+            const end = new Date(start); end.setDate(start.getDate()+6);
+            document.getElementById('week-label').innerText = `Período: ${start.toLocaleDateString()} a ${end.toLocaleDateString()}`;
+            const names = ['SEG','TER','QUA','QUI','SEX','SÁB','DOM'];
+            names.forEach((name, i) => {
+                const curr = new Date(start); curr.setDate(start.getDate()+i);
+                grid.innerHTML += `<div class="wk-col"><div class="wk-header">${name} <br> ${curr.getDate()}</div><div class="wk-body" contenteditable="true"></div><div class="wk-footer"><span>💤</span><span>💧</span><span>🏋️</span></div></div>`;
+            });
+        }
+
+        function renderMonthly() {
+            const grid = document.getElementById('month-grid'); if(!grid) return;
+            grid.innerHTML = '';
+            const val = document.getElementById('month-start').value || getLocalTodayISO();
+            const d = new Date(val + "T12:00:00");
+            const start = new Date(d.setDate(d.getDate() - (d.getDay() || 7) + 1));
+            for(let i=0; i<35; i++) {
+                const curr = new Date(start); curr.setDate(start.getDate()+i);
+                const iso = curr.toISOString().split('T')[0];
+                const ev = state.events.find(e => e.date === iso);
+                grid.innerHTML += `<div class="m-cell"><div class="text-right text-[10px] font-bold">${curr.getDate()}</div><div class="m-content" contenteditable="true"></div>${ev ? '<div class="event-tag tag-crit">'+ev.desc+'</div>' : ''}</div>`;
+            }
+            document.getElementById('month-title').innerText = new Date(val + "T12:00:00").toLocaleString('pt-BR', {month:'long'}).toUpperCase();
+        }
+
+        function renderAnnual() {
+            const y = document.getElementById('year-val').value;
+            document.getElementById('year-disp').innerText = y;
+            const ms = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
+            for(let i=1; i<=4; i++) {
+                const el = document.getElementById('q'+i); if(!el) continue;
+                el.innerHTML = `<div style="text-align:center; font-weight:bold; border-bottom:1px solid #000;">Q${i}</div>`;
+                for(let j=0; j<3; j++) {
+                    el.innerHTML += `<div style="border:1px solid #ccc; flex:1; padding:5px; font-size:0.7rem; display:flex; flex-direction:column;"><div style="font-weight:bold; border-bottom:1px solid #eee;">${ms[(i-1)*3+j]}</div><div style="flex:1" contenteditable="true"></div></div>`;
+                }
+            }
+        }
+
+        function changeDay(delta) { 
+            const d = new Date(state.currentDateStr + "T12:00:00"); 
+            d.setDate(d.getDate()+delta); 
+            loadDay(d.toISOString().split('T')[0]); 
+        }
+
+        function goToToday() { 
+            loadDay(getLocalTodayISO()); 
+        }
+
+        function resetDaily() {
+            if(confirm("Deseja limpar todos os campos deste dia?")) {
+                state.dailyLogs[state.currentDateStr] = { p1:'', p2:'', p3:'', dump:'', timeline:{}, bio:{water:0, sleep:'', workout:false, meds:false} };
+                saveState(); loadDay(state.currentDateStr);
+            }
+        }
+
+        function loadDayFromInput() { 
+            const val = document.getElementById('daily-date').value;
+            if(val) loadDay(val); 
+        }
+
+        function addCritical() { 
+            const d = document.getElementById('new-crit-date').value;
+            const t = document.getElementById('new-crit-desc').value;
+            if(!d || !t) return;
+            state.events.push({date: d, desc: t, id: Date.now()}); 
+            saveState(); renderMonthly(); updateHUD(); 
+        }
+
+        function generateImage() { 
+            html2canvas(document.querySelector('.paper.active'), { scale: 2 }).then(canvas => { 
+                document.getElementById('img-preview').src = canvas.toDataURL(); 
+                document.getElementById('dl-link').href = canvas.toDataURL();
+                document.getElementById('modal').style.display = 'flex'; 
+            }); 
+        }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function togglePrio(n, el) { el.classList.toggle('checked'); saveDay(); }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            if(window.lucide) window.lucide.createIcons();
+            refreshProjSelect();
+            loadDay(state.currentDateStr);
+            renderProj();
+            window.dispatchEvent(new Event('resize'));
+        };
+    </script>
+</body>
+</html>
