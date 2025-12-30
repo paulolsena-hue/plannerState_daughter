@@ -49,6 +49,7 @@
             border-radius: 0.75rem;
         }
 
+        /* Camada de Desenho Digital Otimizada para Scroll */
         #ink-canvas {
             position: absolute;
             top: 0;
@@ -62,13 +63,12 @@
 
         body.pen-mode #ink-canvas {
             pointer-events: auto;
-            cursor: crosshair;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>'), auto;
         }
 
-        .view-content { display: none; height: 100%; }
+        .view-content { display: none; height: auto; min-height: 100%; }
         .view-content.active { display: block; }
 
-        /* Visibilidade de Inputs e Texto */
         input[type="text"], input[type="date"], textarea {
             background-color: transparent !important;
             color: #ffffff !important;
@@ -105,7 +105,6 @@
             text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-        /* Classes para ocultar Nav Inferior */
         .bottom-nav-transition {
             transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         }
@@ -123,14 +122,14 @@
 <body class="bg-background-dark font-display text-white antialiased selection:bg-primary selection:text-white overflow-hidden">
     <div class="relative h-screen w-full flex flex-col">
         
-        <!-- Fundo Decorativo -->
+        <!-- Background Decorativo -->
         <div class="fixed inset-0 pointer-events-none z-0">
             <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] rounded-full bg-primary/20 blur-[100px]"></div>
             <div class="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] rounded-full bg-pink-500/10 blur-[100px]"></div>
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
         </div>
 
-        <!-- Barra Lateral de Alertas -->
+        <!-- Barra Lateral -->
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden transition-opacity opacity-0"></div>
         <aside id="sidebar" class="sidebar-transition fixed top-0 left-0 h-full w-[320px] bg-[#1a1122]/95 backdrop-blur-2xl z-[80] transform -translate-x-full border-r border-white/5 p-6 overflow-y-auto hide-scrollbar shadow-2xl">
             <div class="flex justify-between items-center mb-8">
@@ -166,7 +165,7 @@
                     <button onclick="toggleSidebar()" class="absolute -top-1 -left-1 z-10 bg-primary h-6 w-6 rounded-full flex items-center justify-center border-2 border-[#1a1122] shadow-lg">
                         <span class="material-symbols-outlined text-[14px] text-white">menu</span>
                     </button>
-                    <div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 ring-2 ring-primary/50 shadow-lg shadow-primary/20" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDX0jRxNGVYayPkp_zJx_D5ETmb8RYNL5vPFkbjIkFGtYFbE5y9ZggAVNeiErD0SGW0vH1KUbmK5Ho0cYYEVxVi0UsxC4YYSt0utLXIAqFm1oA9RJr2sOGVr0WaXsEb8xOlm8uJKLPeNnWBKcAFj2o-4_Z9eyTdnDe1UdUUBx6yNLNb0y5QFLb-g1a33DLoKtEiDbw8ID5TyBRmcADES1JafLuGIu1FrxBxheMt-RQEogXL8j7RMuu77bnZolAUtBB3OfuF-fk_HEsF');"></div>
+                    <div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 ring-2 ring-primary/50 shadow-lg shadow-primary/20" style='background-image: url("https://avatarfiles.alphacoders.com/374/374567.png");'></div>
                 </div>
                 <div>
                     <p class="text-white/60 text-xs font-medium tracking-wider uppercase" id="header-day-label">CARREGANDO...</p>
@@ -175,7 +174,6 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <!-- Toggle Ocultar Nav -->
                 <button onclick="toggleBottomNav()" id="nav-toggle-btn" class="glass-panel p-3 rounded-full flex items-center justify-center transition-all hover:bg-white/10 ring-1 ring-white/5" title="Ocultar Menu">
                     <span class="material-symbols-outlined text-white" id="nav-toggle-icon">visibility</span>
                 </button>
@@ -188,7 +186,7 @@
             </div>
         </header>
 
-        <!-- Radar Stream -->
+        <!-- Radar Feed -->
         <div class="relative z-10 flex flex-col gap-2 mb-2 shrink-0">
             <div class="px-6 flex justify-between items-center">
                 <h3 class="text-white/90 text-[10px] font-bold tracking-[0.2em] flex items-center gap-2">
@@ -199,40 +197,46 @@
             <div class="flex overflow-x-auto hide-scrollbar px-6 py-2 gap-4 pb-4" id="radar-container"></div>
         </div>
 
-        <!-- Content Sheet -->
+        <!-- Dashboard Container -->
         <div class="relative z-10 flex-1 glass-panel rounded-t-[2.5rem] mt-2 border-b-0 border-x-0 mx-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
-            <canvas id="ink-canvas"></canvas>
+            
             <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full z-50"></div>
+            
             <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-8 pb-32 relative transition-all duration-500" id="main-scroll-area">
                 
+                <canvas id="ink-canvas"></canvas>
+
                 <!-- VIEW: DAILY -->
-                <div id="view-daily" class="view-content active space-y-10">
+                <div id="view-daily" class="view-content active space-y-10 relative z-10">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2 glass-panel px-3 py-1 rounded-full ring-1 ring-white/5">
-                            <button onclick="changeDay(-1)" class="material-symbols-outlined text-sm opacity-50">chevron_left</button>
-                            <input type="date" id="daily-date" class="bg-transparent border-none text-[10px] font-bold p-0 focus:ring-0 text-white" onchange="loadDayFromInput()"/>
-                            <button onclick="changeDay(1)" class="material-symbols-outlined text-sm opacity-50">chevron_right</button>
+                            <button onclick="changeDay(-1)" class="material-symbols-outlined text-sm text-white">chevron_left</button>
+                            <input type="date" id="daily-date" class="bg-transparent border-none text-[10px] font-bold p-0 text-white" onchange="loadDayFromInput()"/>
+                            <button onclick="changeDay(1)" class="material-symbols-outlined text-sm text-white">chevron_right</button>
                         </div>
                         <button onclick="resetDaily()" class="text-[9px] font-bold text-red-400/60 uppercase tracking-widest">🗑️ Reset Day</button>
                     </div>
                     <section>
                         <h3 class="text-white text-base font-bold flex items-center gap-2 mb-4">
                             <span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-primary to-pink-500 block"></span>
-                            Top 3 Priorities
+                            Prioridades de Hoje
                         </h3>
                         <div class="flex flex-col gap-3" id="daily-priorities"></div>
                     </section>
                     <section>
-                        <h3 class="text-white text-base font-bold flex items-center gap-2 mb-4">
-                            <span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-blue-500 to-cyan-400 block"></span>
-                            Cronograma
-                        </h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-white text-base font-bold flex items-center gap-2">
+                                <span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-blue-500 to-cyan-400 block"></span>
+                                Cronograma Dinâmico
+                            </h3>
+                            <button onclick="addTimelineSlotPrompt()" class="bg-primary/20 text-primary text-[9px] px-4 py-1.5 rounded-full font-black border border-primary/30 uppercase tracking-widest transition-all hover:bg-primary/30">+ Add Task</button>
+                        </div>
                         <div class="relative pl-4 border-l border-white/10 space-y-6" id="daily-flow"></div>
                     </section>
                 </div>
 
                 <!-- VIEW: CONTEXTS -->
-                <div id="view-contexts" class="view-content space-y-8">
+                <div id="view-contexts" class="view-content space-y-8 relative z-10">
                     <div class="flex justify-between items-center">
                         <h3 class="text-white text-lg font-bold flex items-center gap-2">
                             <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span>
@@ -244,28 +248,28 @@
                         <div class="glass-panel p-5 rounded-3xl border border-white/5">
                             <p class="text-rose-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🔥 Urgente</p>
                             <div id="ctx-imp_urg" class="space-y-2"></div>
-                            <button onclick="addContextItem('imp_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase">+ Novo</button>
+                            <button onclick="addContextItem('imp_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white">+ Novo</button>
                         </div>
                         <div class="glass-panel p-5 rounded-3xl border border-white/5">
                             <p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">📅 Importante</p>
                             <div id="ctx-imp_not_urg" class="space-y-2"></div>
-                            <button onclick="addContextItem('imp_not_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase">+ Novo</button>
+                            <button onclick="addContextItem('imp_not_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white">+ Novo</button>
                         </div>
                         <div class="glass-panel p-5 rounded-3xl border border-white/5">
                             <p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🛍️ Compras</p>
                             <div id="ctx-compras" class="space-y-2"></div>
-                            <button onclick="addContextItem('compras')" class="mt-4 text-[10px] opacity-40 font-bold uppercase">+ Novo</button>
+                            <button onclick="addContextItem('compras')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white">+ Novo</button>
                         </div>
                         <div class="glass-panel p-5 rounded-3xl border border-white/5">
                             <p class="text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🏠 Pessoal</p>
                             <div id="ctx-casa" class="space-y-2"></div>
-                            <button onclick="addContextItem('casa')" class="mt-4 text-[10px] opacity-40 font-bold uppercase">+ Novo</button>
+                            <button onclick="addContextItem('casa')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white">+ Novo</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- VIEW: PROJECTS -->
-                <div id="view-projects" class="view-content space-y-8">
+                <div id="view-projects" class="view-content space-y-8 relative z-10">
                     <h3 class="text-white text-lg font-bold flex items-center gap-2 mb-4">
                         <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 block"></span>
                         Roadmap 2026
@@ -275,7 +279,7 @@
                 </div>
 
                 <!-- VIEW: BRAIN DUMP -->
-                <div id="view-dump" class="view-content">
+                <div id="view-dump" class="view-content relative z-10">
                     <h3 class="text-white text-lg font-bold flex items-center gap-2 mb-4">
                         <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-green-400 to-emerald-600 block"></span>
                         Brain Dump
@@ -286,54 +290,48 @@
                 </div>
 
                 <!-- VIEW: MONTHLY -->
-                <div id="view-monthly" class="view-content space-y-6">
+                <div id="view-monthly" class="view-content space-y-6 relative z-10">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-white text-lg font-bold flex items-center gap-2">
                             <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span>
                             Agenda Mensal
                         </h3>
                         <div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
-                            <button onclick="changeMonth(-1)" class="material-symbols-outlined text-white hover:text-primary transition-colors">chevron_left</button>
+                            <button onclick="changeMonth(-1)" class="material-symbols-outlined text-white hover:text-primary">chevron_left</button>
                             <span id="month-title" class="text-sm font-black uppercase tracking-widest text-white min-w-[150px] text-center">---</span>
-                            <button onclick="changeMonth(1)" class="material-symbols-outlined text-white hover:text-primary transition-colors">chevron_right</button>
+                            <button onclick="changeMonth(1)" class="material-symbols-outlined text-white hover:text-primary">chevron_right</button>
                         </div>
                     </div>
-                    
-                    <div class="grid grid-cols-7 gap-1" id="month-header">
-                        <div class="text-center text-[10px] font-black opacity-30 p-2">DOM</div>
-                        <div class="text-center text-[10px] font-black opacity-30 p-2">SEG</div>
-                        <div class="text-center text-[10px] font-black opacity-30 p-2">TER</div>
-                        <div class="text-center text-[10px] font-black opacity-30 p-2">QUA</div>
-                        <div class="text-center text-[10px] font-black opacity-30 p-2">QUI</div>
-                        <div class="text-center text-[10px] font-black opacity-30 p-2">SEX</div>
-                        <div class="text-center text-[10px] font-black opacity-30 p-2">SAB</div>
+                    <div id="month-header" class="grid grid-cols-7 gap-1">
+                        <div class="text-center text-[10px] font-black opacity-30 p-2 text-white">DOM</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">SEG</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">TER</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">QUA</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">QUI</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">SEX</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">SAB</div>
                     </div>
                     <div id="month-grid" class="grid grid-cols-7 gap-1 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"></div>
                 </div>
+
             </div>
         </div>
 
-        <!-- Navegação Inferior -->
+        <!-- Navigation -->
         <nav id="bottom-nav" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[60] bottom-nav-transition">
             <div class="glass-panel rounded-3xl p-2 flex justify-between items-center shadow-2xl shadow-primary/30 ring-1 ring-white/10">
                 <button onclick="nav('daily')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl transition-all" id="btn-daily">
                     <span class="material-symbols-outlined text-[20px]">calendar_view_day</span>
                     <span class="text-[9px] font-bold uppercase tracking-tighter">Diário</span>
                 </button>
-                <button onclick="nav('contexts')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40 transition-all" id="btn-contexts">
+                <button onclick="nav('contexts')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40" id="btn-contexts">
                     <span class="material-symbols-outlined text-[20px]">list_alt</span>
                     <span class="text-[9px] font-bold uppercase tracking-tighter">Listas</span>
                 </button>
                 <div class="relative -top-8 mx-2">
-                    <button onclick="nav('dump')" class="h-16 w-16 rounded-full bg-gradient-to-tr from-pink-500 to-primary flex items-center justify-center shadow-[0_10px_30px_rgba(236,72,153,0.5)] border-4 border-[#191022] hover:scale-105 active:scale-95 transition-all">
+                    <button onclick="nav('dump')" class="h-16 w-16 rounded-full bg-gradient-to-tr from-pink-500 to-primary flex items-center justify-center shadow-[0_10px_30px_rgba(140,43,238,0.5)] border-4 border-[#191022] hover:scale-105 active:scale-95 transition-all">
                         <span class="material-symbols-outlined text-white text-[32px]">psychology</span>
                     </button>
                 </div>
-                <button onclick="nav('projects')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40 transition-all" id="btn-projects">
+                <button onclick="nav('projects')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40" id="btn-projects">
                     <span class="material-symbols-outlined text-[20px]">rocket_launch</span>
                     <span class="text-[9px] font-bold uppercase tracking-tighter">Roadmap</span>
                 </button>
-                <button onclick="nav('monthly')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40 transition-all" id="btn-monthly">
+                <button onclick="nav('monthly')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40" id="btn-monthly">
                     <span class="material-symbols-outlined text-[20px]">calendar_month</span>
                     <span class="text-[9px] font-bold uppercase tracking-tighter">Agenda</span>
                 </button>
@@ -342,18 +340,18 @@
     </div>
 
     <div id="modal" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-6 backdrop-blur-md">
-        <div class="max-w-2xl w-full bg-[#1a1122] rounded-[2.5rem] p-8 border border-white/10 flex flex-col items-center shadow-2xl">
-            <h3 class="text-white text-xl font-bold mb-2">Exportação Concluída</h3>
+        <div class="max-w-2xl w-full bg-[#1a1122] rounded-[2.5rem] p-8 border border-white/10 flex flex-col items-center shadow-2xl text-center">
+            <h3 class="text-white text-xl font-bold mb-2">Export Concluído</h3>
             <img id="img-preview" class="w-full rounded-2xl border border-white/5 mb-8" src=""/>
             <div class="flex gap-4 w-full">
-                <a id="dl-link" download="planner.png" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold text-center">Salvar Imagem</a>
+                <a id="dl-link" download="planner.png" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold">Baixar</a>
                 <button onclick="closeModal()" class="px-8 bg-white/5 text-white rounded-2xl font-bold">Fechar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. ESTADO ---
+        // --- 1. STATE MANAGEMENT ---
         const STATE_KEY = 'plannerState_daughter_v2';
         let state;
         let viewDate = new Date();
@@ -409,10 +407,9 @@
 
         function toggleBottomNav() {
             const nav = document.getElementById('bottom-nav');
-            const content = document.getElementById('main-scroll-area');
             const icon = document.getElementById('nav-toggle-icon');
+            const content = document.getElementById('main-scroll-area');
             const isHidden = nav.classList.contains('nav-hidden');
-
             if(isHidden) {
                 nav.classList.remove('nav-hidden');
                 content.classList.remove('content-expanded');
@@ -452,12 +449,11 @@
         let penMode = false;
 
         function resizeCanvas() {
-            const container = document.getElementById('main-scroll-area');
-            canvas.width = container.clientWidth * 2;
-            canvas.height = container.clientHeight * 2;
+            const area = document.getElementById('main-scroll-area');
+            canvas.width = area.clientWidth * 2;
+            canvas.height = area.scrollHeight * 2; 
             ctx.scale(2, 2);
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
             loadDrawingFromState();
         }
 
@@ -475,8 +471,7 @@
             if(!penMode) return;
             isDrawing = true;
             const rect = canvas.getBoundingClientRect();
-            ctx.beginPath();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.beginPath(); ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
         });
 
         canvas.addEventListener('pointermove', (e) => {
@@ -522,7 +517,10 @@
             if (!state.dailyLogs[dateStr]) {
                 state.dailyLogs[dateStr] = { 
                     p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false,
-                    timeline: { "08:00": "Acordar", "10:00": "Foco Estudo", "13:00": "Almoço", "15:00": "Revisão" }
+                    timeline: { 
+                        "08:00": "Acordar", "10:00": "Foco Estudo", "13:00": "Almoço", "15:00": "Revisão",
+                        "18:00": "Atividade Livre", "20:00": "Jantar / Relaxar", "22:00": "Planeamento Dia Seguinte", "23:00": "Descanso"
+                    }
                 };
             }
             return state.dailyLogs[dateStr];
@@ -535,29 +533,48 @@
             pCont.innerHTML = [1,2,3].map(n => `
                 <div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all">
                     <input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 border-primary/50 bg-transparent text-primary rounded-full focus:ring-0"/>
-                    <input type="text" class="dash-input text-sm flex-1 ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Definir prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/>
+                    <input type="text" class="dash-input text-sm flex-1 ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/>
                 </div>`).join('');
+
             const fCont = document.getElementById('daily-flow');
-            fCont.innerHTML = Object.entries(log.timeline).map(([time, task]) => `
+            const sortedTimes = Object.keys(log.timeline).sort();
+            fCont.innerHTML = sortedTimes.map(time => `
                 <div class="relative group flex gap-4">
                     <div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_10px_#8c2bee]"></div>
-                    <span class="text-[10px] text-primary font-bold w-10 font-mono pt-1">${time}</span>
-                    <div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary">
-                        <input type="text" class="dash-input text-sm" value="${task}" oninput="updateTimelineText('${time}', this.value)"/>
+                    <span class="text-[10px] text-primary font-bold w-12 font-mono pt-1">${time}</span>
+                    <div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2">
+                        <input type="text" class="dash-input text-sm flex-1" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/>
+                        <button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] text-white/30 hover:text-red-400">delete</button>
                     </div>
                 </div>`).join('');
             document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' });
             document.getElementById('daily-date').value = dateStr;
+            resizeCanvas(); 
         }
 
-        // --- 5. SIDEBAR E RADAR ---
+        function addTimelineSlotPrompt() {
+            const time = prompt("Digite o horário (ex: 16:30):");
+            if(time && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time)) {
+                const log = ensureLog(state.currentDateStr);
+                log.timeline[time] = "";
+                saveState();
+                loadDay(state.currentDateStr);
+            } else if(time) { alert("Formato HH:MM"); }
+        }
+
+        function deleteTimelineSlot(time) {
+            const log = state.dailyLogs[state.currentDateStr];
+            if(log) { delete log.timeline[time]; saveState(); loadDay(state.currentDateStr); }
+        }
+
+        // --- 5. SIDEBAR E CALENDÁRIO ---
         function updateRadar() {
             const log = ensureLog(state.currentDateStr);
             const todayISO = getLocalTodayISO();
             const sbPrios = document.getElementById('sidebar-priorities-content');
             if(sbPrios) {
                 const list = [log.p1, log.p2, log.p3].filter(p => p && p.trim() !== "");
-                sbPrios.innerHTML = list.length > 0 ? list.map(p => `<div class="alert-card-sidebar"><p class="text-white text-xs">${p}</p></div>`).join('') : '<p class="text-white/20 text-[10px]">Sem prioridades.</p>';
+                sbPrios.innerHTML = list.length > 0 ? list.map(p => `<div class="alert-card-sidebar text-xs">${p}</div>`).join('') : '<p class="text-white/20 text-[10px]">Sem metas.</p>';
             }
             const container = document.getElementById('radar-container');
             const sbRadar = document.getElementById('sidebar-radar-content');
@@ -565,12 +582,13 @@
                 .filter(e => e.diff >= 0).sort((a,b) => a.diff - b.diff);
             const radarHtml = upcoming.slice(0, 5).map(ev => `
                 <div class="neon-border-wrapper shrink-0">
-                    <div class="bg-[#251b2e] h-full rounded-xl p-4 min-w-[180px] flex gap-3 items-center">
+                    <div class="bg-[#251b2e] h-full rounded-xl p-4 min-w-[180px] flex gap-3 items-center relative group">
+                        <button onclick="deleteEvent(${ev.id})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-[8px] text-white/40">DEL</button>
                         <div class="z-10"><p class="text-white text-xs font-bold uppercase truncate">${ev.desc}</p><p class="text-pink-300 text-[10px]">${ev.diff === 0 ? 'HOJE' : ev.diff + ' d'}</p></div>
                     </div>
                 </div>`).join('');
             if(container) container.innerHTML = radarHtml || '<p class="text-white/20 text-[10px] px-4 font-bold uppercase">Radar Limpo</p>';
-            if(sbRadar) sbRadar.innerHTML = upcoming.map(ev => `<div class="alert-card-sidebar"><p class="text-white text-xs font-bold">${ev.desc}</p><p class="text-primary text-[9px] mt-1 font-black uppercase">${ev.diff === 0 ? 'HOJE' : 'em ' + ev.diff + ' dias'}</p></div>`).join('') || '<p class="text-white/20 text-[10px]">Sem eventos.</p>';
+            if(sbRadar) sbRadar.innerHTML = upcoming.map(ev => `<div class="alert-card-sidebar"><p class="text-white text-xs font-bold">${ev.desc}</p><p class="text-primary text-[9px] mt-1 font-black uppercase">${ev.diff === 0 ? 'HOJE' : 'em ' + ev.diff + ' dias'}</p></div>`).join('');
             const sbRisks = document.getElementById('sidebar-risks-content');
             const riskProj = state.projects.find(p => p.id === 'risk');
             if(sbRisks && riskProj) {
@@ -578,7 +596,6 @@
             }
         }
 
-        // --- 6. CALENDÁRIO ---
         function renderMonthly() {
             const grid = document.getElementById('month-grid');
             const title = document.getElementById('month-title');
@@ -604,7 +621,7 @@
                     state.events.filter(e => e.date === currentISO).forEach(ev => {
                         const item = document.createElement('div');
                         item.className = "bg-primary/20 text-[8px] p-1 rounded border border-primary/20 flex justify-between items-center";
-                        item.innerHTML = `<span class="truncate pr-1">${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-40 hover:opacity-100">delete</button>`;
+                        item.innerHTML = `<span class="truncate pr-1 text-white">${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] text-white/40 opacity-40 hover:opacity-100">delete</button>`;
                         evCont.appendChild(item);
                     });
                     cell.appendChild(evCont);
@@ -614,7 +631,7 @@
         }
         function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderMonthly(); }
 
-        // --- 7. ROADMAP E TAREFAS ---
+        // --- 6. ROADMAP ---
         function renderProj() {
             const list = document.getElementById('projects-list');
             list.innerHTML = state.projects.map(p => {
@@ -624,7 +641,7 @@
                     <div class="flex justify-between items-start mb-3">
                         <div class="flex-1">
                             <input type="text" class="dash-input font-bold text-base" value="${p.title}" oninput="updateProjTitle('${p.id}', this.value)"/>
-                            <p class="text-[9px] text-white/40 uppercase font-bold mt-1">Activo há ${daysOld}d</p>
+                            <p class="text-[9px] uppercase font-bold mt-1 text-white/40">Activo há ${daysOld}d</p>
                         </div>
                     </div>
                     <div class="space-y-3 mt-4">
@@ -633,32 +650,27 @@
                                 <div class="flex items-center gap-3">
                                     <input type="checkbox" ${a.done ? 'checked' : ''} class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0" onchange="toggleAction('${p.id}', ${idx})"/>
                                     <input type="text" class="dash-input text-[11px] flex-1 ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${p.id}', ${idx}, this.value)"/>
-                                    ${p.id === 'risk' ? `<button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg border border-primary/30 font-black">DIVIDIR</button>` : ''}
-                                    <button onclick="deleteAction('${p.id}', ${idx})" class="text-white/20 text-xs">×</button>
+                                    ${p.id === 'risk' ? `<button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg border border-primary/30 font-black transition-all hover:bg-primary/40">DIVIDIR</button>` : ''}
+                                    <button onclick="deleteAction('${p.id}', ${idx})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-red-400">delete</button>
                                 </div>
                                 ${a.phases && a.phases.length > 0 ? `
                                 <div class="mt-3 ml-7 pl-3 border-l border-white/10 space-y-2">
                                     ${a.phases.map((ph, pIdx) => `
                                         <div class="flex items-center gap-2">
-                                            <input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary rounded-sm bg-transparent border-white/10"/>
+                                            <input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary bg-transparent border-white/10 rounded-sm"/>
                                             <input type="text" class="dash-input text-[10px] flex-1 ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/>
                                         </div>`).join('')}
-                                    <button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary/60 font-bold uppercase">+ Adicionar Fase</button>
+                                    <button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary/60 font-bold uppercase transition-all hover:opacity-70">+ Adicionar Fase</button>
                                 </div>` : ''}
                             </div>`).join('')}
                     </div>
-                    <button onclick="addAction('${p.id}')" class="mt-4 text-[9px] text-primary font-bold uppercase">+ Add Task</button>
+                    <button onclick="addAction('${p.id}')" class="mt-4 text-[9px] text-primary font-bold uppercase transition-all hover:opacity-70">+ Add Task</button>
                 </div>`;
             }).join('');
         }
 
-        // --- 8. LOGICA CORE ---
-        function splitTask(idx) {
-            const p = state.projects.find(proj => proj.id === 'risk');
-            if(!p.actions[idx].phases) p.actions[idx].phases = [];
-            p.actions[idx].phases.push({ text: "Nova fase", done: false });
-            saveState(); renderProj();
-        }
+        // --- 7. CORE UTILS ---
+        function splitTask(idx) { const p = state.projects.find(proj => proj.id === 'risk'); if(!p.actions[idx].phases) p.actions[idx].phases = []; p.actions[idx].phases.push({ text: "Nova fase", done: false }); saveState(); renderProj(); }
         function addPhaseToTask(idx) { state.projects.find(p => p.id === 'risk').actions[idx].phases.push({text:"", done:false}); saveState(); renderProj(); }
         function updatePhaseText(idx, pIdx, val) { state.projects.find(p => p.id === 'risk').actions[idx].phases[pIdx].text = val; saveState(); }
         function togglePhase(idx, pIdx) { const ph = state.projects.find(p => p.id === 'risk').actions[idx].phases[pIdx]; ph.done = !ph.done; saveState(); renderProj(); }
@@ -668,42 +680,25 @@
         function updateProjTitle(id, val) { state.projects.find(p => p.id === id).title = val; saveState(); }
         function addNewProject() { state.projects.push({ id: 'p'+Date.now(), title: "Novo Objetivo", created: Date.now(), why: "", actions: [{text: "", done: false, phases:[]}] }); saveState(); renderProj(); }
         function addAction(pId) { state.projects.find(p => p.id === pId).actions.push({text: "", done: false, phases:[]}); saveState(); renderProj(); }
-        function initContexts() {
-            ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => {
-                const el = document.getElementById('ctx-'+k);
-                if(!el) return;
-                el.innerHTML = (state.contexts[k] || []).map((item, idx) => `
-                    <div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all">
-                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0"/>
-                        <input type="text" class="dash-input text-[11px] flex-1 ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/>
-                        <button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs hover:text-red-400">×</button>
-                    </div>`).join('');
-            });
-        }
-        function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
+        function initContexts() { ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { const el = document.getElementById('ctx-'+k); if(!el) return; el.innerHTML = (state.contexts[k] || []).map((item, idx) => `
+            <div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-[11px] flex-1 ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs hover:text-red-400">×</button></div>`).join(''); }); }
         function updateContextItem(k, idx, val) { state.contexts[k][idx].text = val; saveState(); }
         function toggleContextCheck(k, idx) { state.contexts[k][idx].done = !state.contexts[k][idx].done; saveState(); initContexts(); }
         function deleteContextItem(k, idx) { state.contexts[k].splice(idx, 1); saveState(); initContexts(); }
         function clearDoneContexts() { Object.keys(state.contexts).forEach(k => state.contexts[k] = state.contexts[k].filter(i => !i.done)); saveState(); initContexts(); }
-        function addEventPrompt(date = null) { const d = date || prompt("Data (AAAA-MM-DD):", getLocalTodayISO()); const desc = prompt("O que é este evento?"); if(d && desc) { state.events.push({date: d, desc, id: Date.now()}); saveState(); renderAll(); } }
-        function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderAll(); }
-        function togglePrio(n, el) { el.classList.toggle('checked'); saveDay(); }
         function togglePriority(n) { const log = ensureLog(state.currentDateStr); log['p'+n+'_done'] = !log['p'+n+'_done']; saveState(); loadDay(state.currentDateStr); }
         function updatePriorityText(n, val) { const log = ensureLog(state.currentDateStr); log['p'+n] = val; saveState(); }
         function updateTimelineText(time, val) { const log = ensureLog(state.currentDateStr); log.timeline[time] = val; saveState(); }
-        function updateDumpText(val) { state.dump = val; saveState(); }
+        function updateDumpText(v) { state.dump = v; saveState(); }
         function changeDay(delta) { const d = new Date(state.currentDateStr + "T12:00:00"); d.setDate(d.getDate() + delta); state.currentDateStr = d.toISOString().split('T')[0]; renderAll(); saveState(); }
         function loadDayFromInput() { loadDay(document.getElementById('daily-date').value); saveState(); }
-        function resetDaily() { if(confirm("Apagar dia?")) { state.dailyLogs[state.currentDateStr] = null; delete state.inkData[`ink_${state.currentDateStr}`]; renderAll(); saveState(); } }
+        function resetDaily() { if(confirm("Limpar dia?")) { state.dailyLogs[state.currentDateStr] = null; delete state.inkData[`ink_${state.currentDateStr}`]; renderAll(); saveState(); } }
+        function addEventPrompt(date = null) { const d = date || prompt("AAAA-MM-DD"); const t = prompt("Evento:"); if(d && t) { state.events.push({date: d, desc: t, id: Date.now()}); saveState(); renderAll(); } }
+        function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderAll(); }
         function closeModal() { document.getElementById('modal').classList.replace('flex', 'hidden'); }
         function generateScreenshot() { saveDrawingToState(); html2canvas(document.getElementById('main-scroll-area'), { scale: 2, backgroundColor: "#191022", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
 
-        window.onload = function() {
-            lucide.createIcons();
-            resizeCanvas();
-            renderAll();
-            window.addEventListener('resize', resizeCanvas);
-        };
+        window.onload = function() { lucide.createIcons(); resizeCanvas(); renderAll(); window.addEventListener('resize', resizeCanvas); };
     </script>
 </body>
 </html>
