@@ -1,741 +1,708 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html class="dark" lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planner OS - Student Edition</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <title>Planner Dashboard - Student Edition</title>
     
-    <!-- 1. CDNs para React e ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Fontes e Ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     
-    <!-- 2. CDN para Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- 3. CDN para Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- 4. Biblioteca html2canvas -->
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <!-- 5. Biblioteca Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- ESTILOS DO PLANNER -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8c2bee",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
+                    backgroundImage: { 'dot-pattern': 'radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px)' },
+                    backgroundSize: { 'dot-size': '20px 20px' }
+                },
+            },
+        }
+    </script>
+
     <style>
-        :root {
-            --sidebar-width: 500px;
-            --bg-app: #f3f4f6;
-            --bg-panel: #ffffff;
-            --primary: #000000;
-            --text: #333;
-            --block-gray: #E0E0E0;
-            --block-dark: #CCCCCC;
-            --alert-green: #2ecc71;
-            --alert-yellow: #f1c40f;
-            --line-pattern: repeating-linear-gradient(transparent, transparent 29px, #ccc 30px);
+        :root { color-scheme: dark; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: var(--bg-app);
-            overflow: hidden;
+        .neon-border-wrapper {
+            background: linear-gradient(45deg, #ff7eb3, #8c2bee, #00d4ff);
+            padding: 1px;
+            border-radius: 0.75rem;
         }
 
-        /* Alterado para flex por padrão já que não há tela de login */
-        #planner-app {
-            display: flex; 
-            flex-direction: column;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
+        #ink-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 40;
+            pointer-events: none;
+            touch-action: none;
+        }
+
+        body.pen-mode #ink-canvas {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        .view-content { display: none; height: 100%; }
+        .view-content.active { display: block; }
+
+        /* Visibilidade de Inputs e Texto */
+        input[type="text"], input[type="date"], textarea {
+            background-color: transparent !important;
+            color: #ffffff !important;
+            border: none;
+            outline: none;
+        }
+        input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.4) !important; }
+
+        .dash-input {
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+            color: #ffffff !important;
+            width: 100%;
+            padding: 4px 0;
+            outline: none;
         }
 
         .sidebar-transition {
-            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        [contenteditable="true"]:focus {
-            outline: 2px solid #e5e7eb;
-            background-color: rgba(255, 255, 255, 0.5);
+        .alert-card-sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #8c2bee;
+            padding: 12px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 10px;
         }
 
-        .paper { 
-            background: white; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            display: none; 
-            position: relative; 
-            margin-top: 20px;    
-            margin-bottom: 100px; 
-        }
-        .paper.active { display: block; }
-        .a4-portrait { width: 210mm; height: 297mm; padding: 15mm; box-sizing: border-box; }
-        .a4-landscape { width: 297mm; height: 210mm; padding: 10mm; box-sizing: border-box; }
-
-        @media (max-width: 1024px) { 
-            .main-scroll-area { padding: 10px !important; }
-            .paper { margin: 20px auto 100px auto; }
+        .calendar-day-num {
+            color: #ffffff !important;
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-        .daily-grid { display: flex; flex-direction: column; height: 100%; }
-        .daily-header { display: flex; justify-content: space-between; border-bottom: 3px solid black; padding-bottom: 10px; margin-bottom: 15px; }
-        .daily-date-group { width: 40%; }
-        .daily-prio-group { width: 55%; }
-        .big-day-label { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; margin-top: 5px; }
-        .prio-row { display: flex; align-items: center; margin-bottom: 6px; }
-        .prio-check { width: 18px; height: 18px; border: 2px solid black; margin-right: 8px; cursor: pointer; flex-shrink: 0; }
-        .prio-check.checked { background: black; }
-        .prio-input { border: none; border-bottom: 1px solid #ccc; width: 100%; font-family: inherit; font-size: 0.9rem; outline: none; }
-        .prio-input.done { text-decoration: line-through; color: #aaa; }
-        .daily-body { display: flex; flex-grow: 1; gap: 20px; }
-        .col-time { width: 60%; border-right: 1px solid #ccc; padding-right: 15px; display: flex; flex-direction: column; }
-        .col-dump { width: 40%; display: flex; flex-direction: column; }
-        .time-header { background: black; color: white; text-align: center; font-weight: bold; font-size: 0.8rem; padding: 2px; margin-bottom: 5px; }
-        .timeline-box { flex-grow: 1; position: relative; display: flex; flex-direction: column; }
-        .time-slot { flex: 1; border-bottom: 1px solid #e0e0e0; display: flex; position: relative; }
-        .ts-label { width: 40px; font-size: 0.75rem; font-weight: bold; color: #555; text-align: right; padding-right: 8px; border-right: 1px solid #ccc; padding-top: 2px; }
-        .block-routine { position: absolute; left: 45px; right: 0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; border-left: 4px solid #666; opacity: 0.95; z-index: 5; pointer-events: none; }
-        .block-grey { background-color: var(--block-gray); color: #333; }
-        .block-dark { background-color: #333; color: #fff; border-left-color: #000; }
-        .block-alert { background-color: #fff3cd; color: #856404; border-left-color: #ffc107; }
-        .dump-lines { flex-grow: 1; background-image: var(--line-pattern); border-top: 1px solid #ccc; line-height: 30px; font-size: 0.9rem; padding-left: 5px; }
-        .daily-footer { border-top: 2px solid black; padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; font-size: 0.8rem; }
-        .bio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; }
-
-        .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); height: 85%; border-left: 1px solid #eee; border-top: 1px solid #000; }
-        .wk-col { border-right: 1px solid #000; display: flex; flex-direction: column; position: relative; }
-        .wk-col:last-child { border-right: none; }
-        .wk-header { text-align: center; padding: 5px; border-bottom: 1px solid #000; background: #fff; font-weight: bold; font-size: 0.8rem; }
-        .wk-body { flex-grow: 1; position: relative; background-image: repeating-linear-gradient(transparent, transparent 19px, #f8f8f8 20px); font-size: 0.8rem; line-height: 20px; }
-        .wk-footer { height: 25px; border-top: 1px solid #000; display: flex; justify-content: space-around; align-items: center; font-size: 0.7rem; }
-
-        .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(5, 1fr); height: 80%; border: 1px solid #000; }
-        .m-head { background: #eee; text-align: center; font-weight: bold; padding: 5px; border-bottom: 2px solid #000; font-size: 0.8rem; }
-        .m-cell { border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 5px; position: relative; display: flex; flex-direction: column; }
-        .m-cell:nth-child(7n) { border-right: none; background: #fcfcfc; }
-        .m-content { flex-grow: 1; font-size: 0.75rem; }
-        .event-tag { font-size: 0.6rem; padding: 2px; margin-top: 2px; font-weight: bold; }
-        .tag-shift { background: #333; color: white; }
-        .tag-crit { background: #c0392b; color: white; }
-
-        .proj-layout { display: flex; flex-direction: column; height: 100%; }
-        .proj-head { border-bottom: 3px solid black; padding-bottom: 10px; margin-bottom: 20px; }
-        .proj-input-title { font-size: 1.8rem; font-weight: 900; text-transform: uppercase; width: 100%; border: none; border-bottom: 1px dotted #ccc; }
-        .proj-split { display: flex; flex-grow: 1; gap: 20px; }
-        .proj-col-l { width: 40%; border-right: 1px solid #ccc; padding-right: 15px; display: flex; flex-direction: column; }
-        .proj-col-r { width: 60%; display: flex; flex-direction: column; }
-        .proj-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .btn-add-line { width: 100%; padding: 5px; background: #f0f0f0; text-align: center; border: 1px dashed #999; margin-top: 10px; cursor: pointer; font-size: 0.7rem; }
-
-        .ctx-container { display: flex; flex-direction: column; gap: 20px; height: 100%; }
-        .ctx-box { border: 1px solid #ccc; flex: 1; display: flex; flex-direction: column; }
-        .ctx-title { background: #000; color: white; padding: 5px 10px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
-        .ctx-list { padding: 10px; flex-grow: 1; overflow: hidden; }
-        .context-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; border-bottom: 1px dotted #eee; }
-        .ctx-input { flex-grow: 1; border: none; background: transparent; font-size: 0.9rem; outline: none; padding: 4px 0; min-width: 50px; }
-        .ctx-del-btn { color: #ccc; cursor: pointer; padding: 4px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; }
-        .ctx-del-btn:hover { color: #ef4444; background-color: rgba(239, 68, 68, 0.1); border-radius: 4px; }
-
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; overflow: auto; text-align: center; }
-        .modal img { max-width: 100%; border: 1px solid #ccc; margin: 10px 0; }
-
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .alert-card { border-left-width: 8px; padding: 16px; }
-        .alert-title { font-size: 1.1rem; font-weight: 900; }
-        .alert-content { font-size: 1rem; font-weight: 700; color: #222; }
-
-        .task-selector { appearance: none; background-color: #f3f4f6; border: 1px solid transparent; border-radius: 12px; font-size: 0.7rem; font-weight: bold; color: #6b7280; padding: 2px 6px; cursor: pointer; text-align: center; transition: all 0.2s; }
-        .task-selector:hover { border-color: #d1d5db; }
-        .task-selector:focus { outline: none; }
-        .aging-badge { font-size: 0.65rem; color: #ef4444; font-weight: 800; margin-left: 4px; animation: pulse-text 2s infinite; }
-        @keyframes pulse-text { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+        /* Classes para ocultar Nav Inferior */
+        .bottom-nav-transition {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+        .nav-hidden {
+            transform: translate(-50%, 150%) !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .content-expanded {
+            padding-bottom: 2rem !important;
+        }
     </style>
 </head>
-<body class="bg-gray-100 h-screen overflow-hidden">
 
-    <!-- APP CONTAINER -->
-    <div id="planner-app">
+<body class="bg-background-dark font-display text-white antialiased selection:bg-primary selection:text-white overflow-hidden">
+    <div class="relative h-screen w-full flex flex-col">
         
-        <header class="h-16 bg-gray-900 text-white flex items-center justify-between px-4 shadow-lg z-50 shrink-0">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-700 rounded-md transition-colors focus:outline-none">
-                    <i data-lucide="menu" class="w-8 h-8"></i>
-                </button>
-                <div class="font-black text-2xl tracking-wider hidden sm:block">PLANNER <span class="text-gray-400">OS</span> <span class="text-xs bg-gray-700 px-2 py-1 rounded ml-2 uppercase">Student Edition</span></div>
+        <!-- Fundo Decorativo -->
+        <div class="fixed inset-0 pointer-events-none z-0">
+            <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] rounded-full bg-primary/20 blur-[100px]"></div>
+            <div class="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] rounded-full bg-pink-500/10 blur-[100px]"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+        </div>
+
+        <!-- Barra Lateral de Alertas -->
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden transition-opacity opacity-0"></div>
+        <aside id="sidebar" class="sidebar-transition fixed top-0 left-0 h-full w-[320px] bg-[#1a1122]/95 backdrop-blur-2xl z-[80] transform -translate-x-full border-r border-white/5 p-6 overflow-y-auto hide-scrollbar shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-bold tracking-tight">Status Global</h2>
+                <button onclick="toggleSidebar()" class="material-symbols-outlined opacity-50">close</button>
+            </div>
+            <div class="space-y-8">
+                <section>
+                    <p class="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">target</span> Prioridades de Hoje
+                    </p>
+                    <div id="sidebar-priorities-content" class="space-y-3"></div>
+                </section>
+                <section>
+                    <p class="text-[10px] font-black text-pink-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">event</span> Radar de Atenção
+                    </p>
+                    <div id="sidebar-radar-content" class="space-y-3"></div>
+                </section>
+                <section>
+                    <p class="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">warning</span> Riscos Procrastinação
+                    </p>
+                    <div id="sidebar-risks-content" class="space-y-3"></div>
+                </section>
+            </div>
+        </aside>
+
+        <!-- Header -->
+        <header class="relative z-50 flex p-6 items-center justify-between shrink-0">
+            <div class="flex gap-4 items-center">
+                <div class="relative">
+                    <button onclick="toggleSidebar()" class="absolute -top-1 -left-1 z-10 bg-primary h-6 w-6 rounded-full flex items-center justify-center border-2 border-[#1a1122] shadow-lg">
+                        <span class="material-symbols-outlined text-[14px] text-white">menu</span>
+                    </button>
+                    <div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 ring-2 ring-primary/50 shadow-lg shadow-primary/20" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDX0jRxNGVYayPkp_zJx_D5ETmb8RYNL5vPFkbjIkFGtYFbE5y9ZggAVNeiErD0SGW0vH1KUbmK5Ho0cYYEVxVi0UsxC4YYSt0utLXIAqFm1oA9RJr2sOGVr0WaXsEb8xOlm8uJKLPeNnWBKcAFj2o-4_Z9eyTdnDe1UdUUBx6yNLNb0y5QFLb-g1a33DLoKtEiDbw8ID5TyBRmcADES1JafLuGIu1FrxBxheMt-RQEogXL8j7RMuu77bnZolAUtBB3OfuF-fk_HEsF');"></div>
+                </div>
+                <div>
+                    <p class="text-white/60 text-xs font-medium tracking-wider uppercase" id="header-day-label">CARREGANDO...</p>
+                    <p class="text-white text-xl font-bold leading-tight">Min-ji</p>
+                </div>
             </div>
             
-            <div class="flex gap-2 overflow-x-auto hide-scroll px-2 items-center flex-1 sm:flex-none justify-start sm:justify-end">
-                <button title="Diário" class="nav-top-btn active flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('daily')">
-                    <i data-lucide="calendar" class="w-5 h-5"></i>
+            <div class="flex items-center gap-3">
+                <!-- Toggle Ocultar Nav -->
+                <button onclick="toggleBottomNav()" id="nav-toggle-btn" class="glass-panel p-3 rounded-full flex items-center justify-center transition-all hover:bg-white/10 ring-1 ring-white/5" title="Ocultar Menu">
+                    <span class="material-symbols-outlined text-white" id="nav-toggle-icon">visibility</span>
                 </button>
-                <button title="Semanal" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('weekly')">
-                    <i data-lucide="calendar-range" class="w-5 h-5"></i>
+                <button onclick="togglePenMode()" id="pen-toggle" class="glass-panel p-3 rounded-full flex items-center justify-center transition-all hover:bg-white/10 ring-1 ring-white/5">
+                    <span class="material-symbols-outlined text-white" id="pen-icon">edit_off</span>
                 </button>
-                <button title="Mensal" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('monthly')">
-                    <i data-lucide="calendar-days" class="w-5 h-5"></i>
-                </button>
-                <button title="Anual" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('annual')">
-                    <i data-lucide="trending-up" class="w-5 h-5"></i>
-                </button>
-                <button title="Projetos" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('projects')">
-                    <i data-lucide="rocket" class="w-5 h-5"></i>
-                </button>
-                <button title="Contexto" class="nav-top-btn flex items-center justify-center px-4 py-2 rounded-md hover:bg-gray-800 text-base font-bold transition-colors whitespace-nowrap" onclick="nav('contexts')">
-                    <i data-lucide="list-todo" class="w-5 h-5"></i>
+                <button onclick="generateScreenshot()" class="glass-panel p-3 rounded-full flex items-center justify-center transition-all hover:bg-white/10 ring-1 ring-white/5">
+                    <span class="material-symbols-outlined text-white">photo_camera</span>
                 </button>
             </div>
         </header>
 
-        <div class="flex flex-1 overflow-hidden relative">
-            <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+        <!-- Radar Stream -->
+        <div class="relative z-10 flex flex-col gap-2 mb-2 shrink-0">
+            <div class="px-6 flex justify-between items-center">
+                <h3 class="text-white/90 text-[10px] font-bold tracking-[0.2em] flex items-center gap-2">
+                    <span class="material-symbols-outlined text-pink-400 text-[16px]">local_florist</span>
+                    ATTENTION RADAR
+                </h3>
+            </div>
+            <div class="flex overflow-x-auto hide-scrollbar px-6 py-2 gap-4 pb-4" id="radar-container"></div>
+        </div>
 
-            <nav id="sidebar" class="sidebar-transition absolute lg:relative bg-white border-r border-gray-200 h-full z-40 transform -translate-x-full lg:translate-x-0 flex flex-col shadow-xl lg:shadow-none" style="width: var(--sidebar-width);">
-                <div class="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between lg:hidden">
-                    <span class="font-black text-xl text-gray-800">ALERTAS & HUD</span>
-                    <button onclick="toggleSidebar()" class="text-gray-600 hover:text-black"><i data-lucide="x" class="w-8 h-8"></i></button>
+        <!-- Content Sheet -->
+        <div class="relative z-10 flex-1 glass-panel rounded-t-[2.5rem] mt-2 border-b-0 border-x-0 mx-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
+            <canvas id="ink-canvas"></canvas>
+            <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full z-50"></div>
+            <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-8 pb-32 relative transition-all duration-500" id="main-scroll-area">
+                
+                <!-- VIEW: DAILY -->
+                <div id="view-daily" class="view-content active space-y-10">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2 glass-panel px-3 py-1 rounded-full ring-1 ring-white/5">
+                            <button onclick="changeDay(-1)" class="material-symbols-outlined text-sm opacity-50">chevron_left</button>
+                            <input type="date" id="daily-date" class="bg-transparent border-none text-[10px] font-bold p-0 focus:ring-0 text-white" onchange="loadDayFromInput()"/>
+                            <button onclick="changeDay(1)" class="material-symbols-outlined text-sm opacity-50">chevron_right</button>
+                        </div>
+                        <button onclick="resetDaily()" class="text-[9px] font-bold text-red-400/60 uppercase tracking-widest">🗑️ Reset Day</button>
+                    </div>
+                    <section>
+                        <h3 class="text-white text-base font-bold flex items-center gap-2 mb-4">
+                            <span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-primary to-pink-500 block"></span>
+                            Top 3 Priorities
+                        </h3>
+                        <div class="flex flex-col gap-3" id="daily-priorities"></div>
+                    </section>
+                    <section>
+                        <h3 class="text-white text-base font-bold flex items-center gap-2 mb-4">
+                            <span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-blue-500 to-cyan-400 block"></span>
+                            Cronograma
+                        </h3>
+                        <div class="relative pl-4 border-l border-white/10 space-y-6" id="daily-flow"></div>
+                    </section>
                 </div>
 
-                <div class="flex-1 overflow-y-auto p-6 space-y-6">
-                    <div id="alert-critical-card" class="bg-gray-50 border-l-4 border-gray-300 p-3 rounded-r-md shadow-sm transition-all duration-300 opacity-50 alert-card">
-                        <div id="alert-critical-header" class="flex items-center gap-3 text-gray-700 alert-title mb-3">
-                            <i data-lucide="alert-triangle" class="w-6 h-6"></i> Radar de Eventos
-                        </div>
-                        <div id="alert-critical-content" class="alert-content text-gray-500 italic space-y-2">
-                            Sem eventos registrados.
-                        </div>
+                <!-- VIEW: CONTEXTS -->
+                <div id="view-contexts" class="view-content space-y-8">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-white text-lg font-bold flex items-center gap-2">
+                            <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span>
+                            Listas de Contexto
+                        </h3>
+                        <button onclick="clearDoneContexts()" class="text-[9px] font-bold text-primary/60 uppercase tracking-widest">Limpar Feitos</button>
                     </div>
-
-                    <div class="bg-green-50 border-l-4 border-green-500 p-3 rounded-r-md shadow-sm alert-card">
-                        <div class="flex items-center gap-3 text-green-800 alert-title mb-3">
-                            <i data-lucide="target" class="w-6 h-6"></i> Prioridades do Dia
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-panel p-5 rounded-3xl border border-white/5">
+                            <p class="text-rose-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🔥 Urgente</p>
+                            <div id="ctx-imp_urg" class="space-y-2"></div>
+                            <button onclick="addContextItem('imp_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase">+ Novo</button>
                         </div>
-                        <div id="alert-priority-content" class="alert-content text-gray-700 italic">Defina no Diário...</div>
-                    </div>
-
-                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded-r-md shadow-sm alert-card">
-                        <div class="flex items-center gap-3 text-yellow-800 alert-title mb-3">
-                            <i data-lucide="alert-circle" class="w-6 h-6"></i> Risco Procrastinação
+                        <div class="glass-panel p-5 rounded-3xl border border-white/5">
+                            <p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">📅 Importante</p>
+                            <div id="ctx-imp_not_urg" class="space-y-2"></div>
+                            <button onclick="addContextItem('imp_not_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase">+ Novo</button>
                         </div>
-                        <div id="alert-risk-content" class="alert-content text-gray-700 italic">Nenhum risco.</div>
-                    </div>
-
-                    <div class="bg-rose-50 border-rose-500 rounded-r-md shadow-sm alert-card">
-                        <div class="flex items-center gap-3 text-rose-800 alert-title mb-3">
-                            <i data-lucide="siren" class="w-6 h-6"></i> Importante & Urgente
+                        <div class="glass-panel p-5 rounded-3xl border border-white/5">
+                            <p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🛍️ Compras</p>
+                            <div id="ctx-compras" class="space-y-2"></div>
+                            <button onclick="addContextItem('compras')" class="mt-4 text-[10px] opacity-40 font-bold uppercase">+ Novo</button>
                         </div>
-                        <div id="alert-imp-urg-content" class="alert-content text-gray-700 italic">Vazio.</div>
-                    </div>
-
-                    <div class="bg-indigo-50 border-indigo-500 rounded-r-md shadow-sm alert-card">
-                        <div class="flex items-center gap-3 text-indigo-800 alert-title mb-3">
-                            <i data-lucide="calendar-clock" class="w-6 h-6"></i> Importante & Ñ Urgente
+                        <div class="glass-panel p-5 rounded-3xl border border-white/5">
+                            <p class="text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🏠 Pessoal</p>
+                            <div id="ctx-casa" class="space-y-2"></div>
+                            <button onclick="addContextItem('casa')" class="mt-4 text-[10px] opacity-40 font-bold uppercase">+ Novo</button>
                         </div>
-                        <div id="alert-imp-not-urg-content" class="alert-content text-gray-700 italic">Vazio.</div>
                     </div>
                 </div>
 
-                <div class="p-6 border-t border-gray-200 bg-gray-50">
-                    <button onclick="generateImage()" class="w-full bg-black text-white py-4 rounded-xl font-black shadow-lg hover:bg-gray-800 transition-colors flex flex-col items-center justify-center action-btn">
-                        <span class="flex items-center gap-3"><i data-lucide="camera" class="w-6 h-6"></i> GERAR IMAGEM</span>
-                        <span class="text-xs font-bold opacity-80 mt-1 uppercase tracking-wider">A4 (Alta Resolução)</span>
+                <!-- VIEW: PROJECTS -->
+                <div id="view-projects" class="view-content space-y-8">
+                    <h3 class="text-white text-lg font-bold flex items-center gap-2 mb-4">
+                        <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 block"></span>
+                        Roadmap 2026
+                    </h3>
+                    <div id="projects-list" class="space-y-4"></div>
+                    <button onclick="addNewProject()" class="w-full py-4 rounded-2xl border border-dashed border-white/10 text-white/30 text-xs font-bold hover:bg-white/5 transition-all uppercase tracking-widest">+ New Objective</button>
+                </div>
+
+                <!-- VIEW: BRAIN DUMP -->
+                <div id="view-dump" class="view-content">
+                    <h3 class="text-white text-lg font-bold flex items-center gap-2 mb-4">
+                        <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-green-400 to-emerald-600 block"></span>
+                        Brain Dump
+                    </h3>
+                    <div class="w-full h-80 bg-white/5 rounded-3xl p-6 border border-white/10 bg-dot-pattern bg-dot-size relative group">
+                        <textarea id="brain-dump-text" class="w-full h-full bg-transparent border-none resize-none focus:ring-0 text-sm text-white/80 leading-relaxed" placeholder="Anote qualquer pensamento aqui..." oninput="updateDumpText(this.value)"></textarea>
+                    </div>
+                </div>
+
+                <!-- VIEW: MONTHLY -->
+                <div id="view-monthly" class="view-content space-y-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-white text-lg font-bold flex items-center gap-2">
+                            <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span>
+                            Agenda Mensal
+                        </h3>
+                        <div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                            <button onclick="changeMonth(-1)" class="material-symbols-outlined text-white hover:text-primary transition-colors">chevron_left</button>
+                            <span id="month-title" class="text-sm font-black uppercase tracking-widest text-white min-w-[150px] text-center">---</span>
+                            <button onclick="changeMonth(1)" class="material-symbols-outlined text-white hover:text-primary transition-colors">chevron_right</button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-7 gap-1" id="month-header">
+                        <div class="text-center text-[10px] font-black opacity-30 p-2">DOM</div>
+                        <div class="text-center text-[10px] font-black opacity-30 p-2">SEG</div>
+                        <div class="text-center text-[10px] font-black opacity-30 p-2">TER</div>
+                        <div class="text-center text-[10px] font-black opacity-30 p-2">QUA</div>
+                        <div class="text-center text-[10px] font-black opacity-30 p-2">QUI</div>
+                        <div class="text-center text-[10px] font-black opacity-30 p-2">SEX</div>
+                        <div class="text-center text-[10px] font-black opacity-30 p-2">SAB</div>
+                    </div>
+                    <div id="month-grid" class="grid grid-cols-7 gap-1 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegação Inferior -->
+        <nav id="bottom-nav" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[60] bottom-nav-transition">
+            <div class="glass-panel rounded-3xl p-2 flex justify-between items-center shadow-2xl shadow-primary/30 ring-1 ring-white/10">
+                <button onclick="nav('daily')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl transition-all" id="btn-daily">
+                    <span class="material-symbols-outlined text-[20px]">calendar_view_day</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Diário</span>
+                </button>
+                <button onclick="nav('contexts')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40 transition-all" id="btn-contexts">
+                    <span class="material-symbols-outlined text-[20px]">list_alt</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Listas</span>
+                </button>
+                <div class="relative -top-8 mx-2">
+                    <button onclick="nav('dump')" class="h-16 w-16 rounded-full bg-gradient-to-tr from-pink-500 to-primary flex items-center justify-center shadow-[0_10px_30px_rgba(236,72,153,0.5)] border-4 border-[#191022] hover:scale-105 active:scale-95 transition-all">
+                        <span class="material-symbols-outlined text-white text-[32px]">psychology</span>
                     </button>
                 </div>
-            </nav>
+                <button onclick="nav('projects')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40 transition-all" id="btn-projects">
+                    <span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Roadmap</span>
+                </button>
+                <button onclick="nav('monthly')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl text-white/40 transition-all" id="btn-monthly">
+                    <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Agenda</span>
+                </button>
+            </div>
+        </nav>
+    </div>
 
-            <main class="main-scroll-area flex-1 bg-gray-200 overflow-auto p-4 lg:p-8 flex justify-center items-start relative transition-all">
-                
-                <!-- DIÁRIO -->
-                <div id="view-daily" class="paper a4-portrait active" data-orientation="portrait">
-                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 shadow-sm mb-4">
-                        <button onclick="changeDay(-1)" class="p-1 hover:bg-gray-200 rounded transition-colors"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
-                        <input type="date" id="daily-date" class="border border-gray-300 rounded px-2 py-1 text-sm font-bold" onchange="loadDayFromInput()">
-                        <button onclick="changeDay(1)" class="p-1 hover:bg-gray-200 rounded transition-colors"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
-                        <button onclick="goToToday()" class="px-3 py-1 text-xs bg-black text-white rounded font-bold ml-2 hover:bg-gray-800 transition-colors">Hoje</button>
-                        <button class="px-2 py-1 text-xs bg-red-100 text-red-700 border border-red-200 rounded font-bold ml-auto hover:bg-red-200" onclick="resetDaily()">🗑️ Limpar</button>
-                    </div>
-
-                    <div class="flex items-center gap-2 mb-4">
-                         <label for="template-select" class="text-xs font-bold text-gray-600 uppercase">Bloco de Rotina:</label>
-                         <select id="template-select" onchange="setTemplate(this.value)" class="border border-gray-300 rounded px-2 py-1 text-sm font-bold bg-white focus:outline-none focus:ring-1 focus:ring-black flex-1">
-                             <option value="" disabled selected>Escolher rotina sugerida...</option>
-                             <option value="S-foco">Bloco de Foco (4h Concentração)</option>
-                             <option value="S-rotina">Rotina Padrão (Manhã/Tarde/Noite)</option>
-                             <option value="S-descanso">Modo Descanso / Offline</option>
-                         </select>
-                    </div>
-
-                    <div class="daily-grid">
-                        <div id="page-crit-banner" class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 text-center font-bold text-sm mb-4 hidden rounded"></div>
-                        <div class="daily-header">
-                            <div class="daily-date-group">
-                                <div id="day-label" class="big-day-label">CARREGANDO...</div>
-                            </div>
-                            <div class="daily-prio-group">
-                                <div class="text-xs font-black uppercase border-b-2 border-black mb-1">Top 3 do Dia</div>
-                                <div class="prio-row"><div class="prio-check" onclick="togglePrio(1, this)"></div><input id="p1" class="prio-input" placeholder="1. Inegociável" oninput="saveDay()"></div>
-                                <div class="prio-row"><div class="prio-check" onclick="togglePrio(2, this)"></div><input id="p2" class="prio-input" placeholder="2. Importante" oninput="saveDay()"></div>
-                                <div class="prio-row"><div class="prio-check" onclick="togglePrio(3, this)"></div><input id="p3" class="prio-input" placeholder="3. Desejável" oninput="saveDay()"></div>
-                            </div>
-                        </div>
-                        <div class="daily-body">
-                            <div class="col-time">
-                                <div class="time-header">AGENDA (07:00 - 23:00)</div>
-                                <div id="daily-timeline" class="timeline-box"></div>
-                            </div>
-                            <div class="col-dump">
-                                <div class="font-black border-b-2 border-black mb-2">BRAIN DUMP 🧠</div>
-                                <div id="daily-mode-badge" class="border-2 border-black p-1 text-center font-bold mb-2 hidden bg-white">🎯 FOCO TOTAL</div>
-                                <div id="daily-dump" class="dump-lines" contenteditable="true" oninput="saveDay()"></div>
-                            </div>
-                        </div>
-                        <div class="daily-footer">
-                            <div class="bio-item" onclick="toggleBio('water')">💧 Hidratação: <span id="bio-water">○○○○○ ○○○○○</span></div>
-                            <div class="bio-item" onclick="toggleBio('sleep')">💤 Sono: <span id="bio-sleep">____h</span></div>
-                            <div class="bio-item" onclick="toggleBio('workout')">🏋️ Treino: <span id="bio-workout">[ ]</span></div>
-                            <div class="bio-item" onclick="toggleBio('meds')">💊 Rotina: <span id="bio-meds">[ ]</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="view-weekly" class="paper a4-landscape" data-orientation="landscape">
-                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 shadow-sm mb-4">
-                        <input type="date" id="week-start" onchange="renderWeekly()" class="border border-gray-300 rounded px-2 py-1 text-sm">
-                    </div>
-                    <h1 class="text-2xl font-bold border-b-4 border-black mb-2 pb-1 uppercase">Planejamento Semanal</h1>
-                    <div id="week-label" class="font-bold mb-2 text-gray-600"></div>
-                    <div id="week-grid" class="week-grid"></div>
-                </div>
-
-                <div id="view-monthly" class="paper a4-landscape" data-orientation="landscape">
-                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 shadow-sm mb-4 overflow-x-auto">
-                        <input type="date" id="month-start" value="2026-01-01" class="border border-gray-300 rounded px-2 py-1 text-sm">
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs font-bold" onclick="renderMonthly()">Atualizar</button>
-                        <div class="border-l border-gray-400 pl-2 flex items-center gap-2">
-                            <input type="date" id="new-crit-date" class="border border-gray-300 rounded px-1 py-1 text-xs">
-                            <input type="text" id="new-crit-desc" placeholder="Evento..." class="border border-gray-300 rounded px-1 py-1 text-xs w-32">
-                            <button class="px-3 py-1 bg-black text-white rounded text-xs font-bold" onclick="addCritical()">+ Alerta</button>
-                        </div>
-                    </div>
-                    <h1 id="month-title" class="text-3xl font-black uppercase mb-2">MÊS</h1>
-                    <div id="month-grid" class="month-grid"></div>
-                </div>
-
-                <div id="view-annual" class="paper a4-landscape" data-orientation="landscape">
-                    <h1 class="border-b-4 border-black mb-4 text-2xl font-black uppercase">Roadmap Anual <span id="year-disp">2026</span></h1>
-                    <input type="number" id="year-val" value="2026" class="mb-4 border p-1 rounded text-sm w-24" onchange="renderAnnual()">
-                    <div class="grid grid-cols-4 gap-4 h-[80%]">
-                        <div id="q1" class="flex flex-col gap-2"></div>
-                        <div id="q2" class="flex flex-col gap-2"></div>
-                        <div id="q3" class="flex flex-col gap-2"></div>
-                        <div id="q4" class="flex flex-col gap-2"></div>
-                    </div>
-                </div>
-
-                <div id="view-projects" class="paper a4-portrait" data-orientation="portrait">
-                    <div class="flex gap-2 items-center bg-gray-50 p-2 rounded border border-gray-200 shadow-sm mb-4">
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs font-bold hover:bg-gray-100 transition-colors" onclick="newProject()">+ Novo</button>
-                        <select id="proj-select" onchange="loadProject(this.value)" class="border border-gray-300 rounded px-2 py-1 text-sm bg-white"></select>
-                    </div>
-                    <div class="proj-layout">
-                        <input id="proj-title" class="proj-input-title" value="OBJETIVO" oninput="saveProj()">
-                        <div class="mt-2 bg-gray-100 p-2 border-l-4 border-black mb-4">
-                            <div class="text-[10px] font-bold uppercase">Motivação:</div>
-                            <input id="proj-why" class="w-full border-none bg-transparent italic text-sm focus:outline-none" oninput="saveProj()">
-                        </div>
-                        <div class="proj-split">
-                            <div class="proj-col-l">
-                                <div class="font-black border-b-2 border-black mb-1 text-sm">ETAPAS</div>
-                                <div id="proj-phases"></div>
-                                <div class="btn-add-line" onclick="addProjItem('phase')">+ Etapa</div>
-                            </div>
-                            <div class="proj-col-r">
-                                <div class="font-black border-b-2 border-black mb-1 text-sm">PRÓXIMAS AÇÕES</div>
-                                <div id="proj-actions"></div>
-                                <div class="btn-add-line" onclick="addProjItem('action')">+ Ação</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="view-contexts" class="paper a4-portrait" data-orientation="portrait">
-                    <div class="flex justify-end gap-2 mb-4 bg-gray-50 p-2 rounded border border-gray-200 shadow-sm">
-                        <button class="px-3 py-1 bg-white border border-gray-300 rounded text-xs font-bold text-blue-700 hover:bg-blue-50" onclick="clearDoneContexts()">Limpar Feitos</button>
-                    </div>
-                    <h1 class="border-b-4 border-black mb-4 pb-2 text-2xl font-black">LISTAS DE CAPTURA</h1>
-                    <div class="ctx-container">
-                        <div class="ctx-box">
-                            <div class="ctx-title bg-rose-800 text-white"><span>🔥 Urgente</span><button class="bg-rose-950 px-2 rounded" onclick="addContextItem('imp_urg')">+</button></div>
-                            <div id="ctx-imp_urg" class="ctx-list"></div>
-                        </div>
-                        <div class="ctx-box">
-                            <div class="ctx-title bg-indigo-800 text-white"><span>📅 Importante</span><button class="bg-indigo-950 px-2 rounded" onclick="addContextItem('imp_not_urg')">+</button></div>
-                            <div id="ctx-imp_not_urg" class="ctx-list"></div>
-                        </div>
-                        <div class="ctx-box">
-                            <div class="ctx-title bg-black text-white"><span>🛍️ Compras</span><button class="bg-gray-800 px-2 rounded" onclick="addContextItem('compras')">+</button></div>
-                            <div id="ctx-compras" class="ctx-list"></div>
-                        </div>
-                        <div class="ctx-box">
-                            <div class="ctx-title bg-black text-white"><span>🏠 Pessoal / Casa</span><button class="bg-gray-800 px-2 rounded" onclick="addContextItem('casa')">+</button></div>
-                            <div id="ctx-casa" class="ctx-list"></div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+    <div id="modal" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-6 backdrop-blur-md">
+        <div class="max-w-2xl w-full bg-[#1a1122] rounded-[2.5rem] p-8 border border-white/10 flex flex-col items-center shadow-2xl">
+            <h3 class="text-white text-xl font-bold mb-2">Exportação Concluída</h3>
+            <img id="img-preview" class="w-full rounded-2xl border border-white/5 mb-8" src=""/>
+            <div class="flex gap-4 w-full">
+                <a id="dl-link" download="planner.png" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold text-center">Salvar Imagem</a>
+                <button onclick="closeModal()" class="px-8 bg-white/5 text-white rounded-2xl font-bold">Fechar</button>
+            </div>
         </div>
     </div>
 
-    <div id="modal" class="modal" onclick="closeModal()">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <h3 class="font-bold text-lg mb-2">Imagem Gerada</h3>
-            <img id="img-preview" src="" class="mx-auto shadow-md">
-            <br>
-            <a id="dl-link" class="inline-block bg-black text-white px-6 py-2 rounded font-bold" style="text-decoration:none;">⬇️ Baixar</a>
-            <button class="ml-4 px-4 py-2 border rounded hover:bg-gray-100" onclick="closeModal()">Fechar</button>
-        </div>
-    </div>
-
-    <!-- LOGICA DO PLANNER -->
     <script>
-        // --- 1. STATE (RESTAURADO E ISOLADO) ---
+        // --- 1. ESTADO ---
+        const STATE_KEY = 'plannerState_daughter_v2';
         let state;
-        const STATE_KEY = 'plannerState_daughter';
+        let viewDate = new Date();
         
         function getLocalTodayISO() {
             const now = new Date();
             const offset = now.getTimezoneOffset();
-            const localDate = new Date(now.getTime() - (offset * 60 * 1000));
-            return localDate.toISOString().split('T')[0];
+            return new Date(now.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
         }
 
         try {
             state = JSON.parse(localStorage.getItem(STATE_KEY));
         } catch (e) { state = null; }
 
-        const defaultProjects = {
-            p2026: { title: "OBJETIVOS 2026", why: "Evolução e Clareza", phases: ["Planejamento"], actions: [{text: "Definir prioridades", created: Date.now()}] },
-            self: { title: "DESENVOLVIMENTO", why: "Habilidades", phases: ["Cursos"], actions: [{text: "Leitura semanal", created: Date.now()}] },
-            risk: { title: "RISCO PROCRASTINAÇÃO", why: "Action imediata", phases: ["Urgente"], actions: [{text: "Resolver pendência", created: Date.now()}] }
-        };
-
         if (!state) {
             state = {
-                activeView: 'view-daily',
+                activeView: 'daily',
                 events: [],
-                projects: defaultProjects,
-                currentProjId: 'p2026',
-                dailyLogs: {},
+                projects: [
+                    { id: 'p1', title: "Evolução Pessoal 2026", created: Date.now(), why: "Propósito", actions: [{text: "Definir metas", done: false, phases: []}] },
+                    { id: 'risk', title: "Risco Procrastinação", created: Date.now(), why: "Ação imediata", actions: [{text: "Tarefa crítica", done: false, phases: []}] }
+                ],
                 currentDateStr: getLocalTodayISO(),
+                dailyLogs: {},
+                inkData: {},
+                dump: "",
                 contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] }
             };
         }
 
-        function saveState() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
+        function saveState() {
+            saveDrawingToState();
+            localStorage.setItem(STATE_KEY, JSON.stringify(state));
+            updateRadar();
+        }
 
-        // --- 2. NAVEGAÇÃO ---
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
-        
+        // --- 2. SIDEBAR E NAVEGAÇÃO ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            if (isOpen) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                overlay.classList.remove('opacity-100');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.add('opacity-100'), 10);
+                updateRadar();
+            }
+        }
+
+        function toggleBottomNav() {
+            const nav = document.getElementById('bottom-nav');
+            const content = document.getElementById('main-scroll-area');
+            const icon = document.getElementById('nav-toggle-icon');
+            const isHidden = nav.classList.contains('nav-hidden');
+
+            if(isHidden) {
+                nav.classList.remove('nav-hidden');
+                content.classList.remove('content-expanded');
+                icon.innerText = "visibility";
+            } else {
+                nav.classList.add('nav-hidden');
+                content.classList.add('content-expanded');
+                icon.innerText = "visibility_off";
+            }
+        }
+
         function nav(viewId) {
+            saveDrawingToState();
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('bg-primary', 'text-white', 'shadow-lg');
+                b.classList.add('text-white/40');
+            });
+            const target = document.getElementById('view-' + viewId);
+            if(target) target.classList.add('active');
+            const btn = document.getElementById('btn-' + viewId);
+            if(btn) {
+                btn.classList.remove('text-white/40');
+                btn.classList.add('bg-primary', 'text-white', 'shadow-lg');
+            }
+            state.activeView = viewId;
+            renderAll(); 
             if(window.innerWidth < 1024 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
                 toggleSidebar();
             }
-
-            document.querySelectorAll('.paper').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-top-btn').forEach(el => el.classList.remove('bg-gray-800', 'text-white'));
-            
-            const target = 'view-' + viewId;
-            const el = document.getElementById(target);
-            if(el) el.classList.add('active');
-            state.activeView = target;
-            saveState();
-
-            if(viewId === 'daily') loadDay(state.currentDateStr);
-            if(viewId === 'weekly') renderWeekly();
-            if(viewId === 'monthly') renderMonthly();
-            if(viewId === 'annual') renderAnnual();
-            if(viewId === 'projects') renderProj();
-            if(viewId === 'contexts') initContexts();
         }
 
-        // --- 3. HUD ---
-        function updateHUD() {
-            const data = state.dailyLogs[state.currentDateStr] || { p1:'', p2:'', p3:'' };
-            const prios = [data.p1, data.p2, data.p3].filter(x => x).map(x => `• ${x}`).join('<br>');
-            document.getElementById('alert-priority-content').innerHTML = prios || 'Defina no Diário...';
+        // --- 3. INK LOGIC (STYLUS) ---
+        const canvas = document.getElementById('ink-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let penMode = false;
 
-            const riskProj = state.projects['risk'];
-            const risks = riskProj.actions.slice(0,3).map(a => `• ${a.text}`).join('<br>');
-            document.getElementById('alert-risk-content').innerHTML = risks || 'Nenhum risco.';
-
-            const urg = (state.contexts.imp_urg || []).filter(i => !i.done).slice(0,3).map(i => `🔥 ${i.text}`).join('<br>');
-            document.getElementById('alert-imp-urg-content').innerHTML = urg || 'Vazio.';
-
-            const nurg = (state.contexts.imp_not_urg || []).filter(i => !i.done).slice(0,3).map(i => `📅 ${i.text}`).join('<br>');
-            document.getElementById('alert-imp-not-urg-content').innerHTML = nurg || 'Vazio.';
-
-            checkCritical();
+        function resizeCanvas() {
+            const container = document.getElementById('main-scroll-area');
+            canvas.width = container.clientWidth * 2;
+            canvas.height = container.clientHeight * 2;
+            ctx.scale(2, 2);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            loadDrawingFromState();
         }
 
-        // --- 4. RADAR ---
-        function checkCritical() {
-            const today = new Date(state.currentDateStr + "T12:00:00");
-            const alertContent = document.getElementById('alert-critical-content');
-            const alertBox = document.getElementById('alert-critical-card');
-            if(!alertContent) return;
+        function togglePenMode() {
+            penMode = !penMode;
+            document.body.classList.toggle('pen-mode', penMode);
+            const icon = document.getElementById('pen-icon');
+            const btn = document.getElementById('pen-toggle');
+            icon.innerText = penMode ? "edit" : "edit_off";
+            btn.classList.toggle('bg-primary/40', penMode);
+            if(!penMode) saveDrawingToState();
+        }
 
-            const upcoming = state.events
-                .map(e => {
-                    const eDate = new Date(e.date + "T12:00:00");
-                    const diffDays = Math.ceil((eDate - today) / (1000 * 60 * 60 * 24));
-                    return { ...e, diffDays };
-                })
-                .filter(e => e.diffDays >= 0)
-                .sort((a,b) => a.diffDays - b.diffDays);
+        canvas.addEventListener('pointerdown', (e) => {
+            if(!penMode) return;
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        });
 
-            if(upcoming.length > 0) {
-                alertContent.innerHTML = upcoming.map(ev => `
-                    <div class="mb-2 border-b pb-2 last:border-0">
-                        <div class="flex justify-between text-[10px] font-bold"><span>${ev.date}</span><span>${ev.diffDays === 0 ? 'HOJE' : ev.diffDays+'d'}</span></div>
-                        <div class="text-sm font-black">${ev.desc}</div>
-                    </div>`).join('');
-                alertBox.classList.remove('opacity-50');
-            } else {
-                alertContent.innerText = 'Sem eventos próximos.';
-                alertBox.classList.add('opacity-50');
+        canvas.addEventListener('pointermove', (e) => {
+            if(!isDrawing || !penMode) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineWidth = e.pressure ? e.pressure * 5 : 2;
+            ctx.strokeStyle = "#8c2bee";
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener('pointerup', () => { isDrawing = false; saveDrawingToState(); });
+
+        function saveDrawingToState() {
+            const key = state.activeView === 'daily' ? `ink_${state.currentDateStr}` : `ink_${state.activeView}`;
+            state.inkData[key] = canvas.toDataURL();
+        }
+
+        function loadDrawingFromState() {
+            const key = state.activeView === 'daily' ? `ink_${state.currentDateStr}` : `ink_${state.activeView}`;
+            const data = state.inkData[key];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if(data) {
+                const img = new Image();
+                img.onload = () => ctx.drawImage(img, 0, 0, canvas.width/2, canvas.height/2);
+                img.src = data;
             }
         }
 
-        // --- 5. LÓGICA DIÁRIA ---
+        // --- 4. DATA RENDERS ---
+        function renderAll() {
+            const view = state.activeView;
+            if(view === 'daily') loadDay(state.currentDateStr);
+            if(view === 'projects') renderProj();
+            if(view === 'monthly') renderMonthly();
+            if(view === 'contexts') initContexts();
+            if(view === 'dump') document.getElementById('brain-dump-text').value = state.dump || "";
+            updateRadar();
+            loadDrawingFromState();
+        }
+
+        function ensureLog(dateStr) {
+            if (!state.dailyLogs[dateStr]) {
+                state.dailyLogs[dateStr] = { 
+                    p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false,
+                    timeline: { "08:00": "Acordar", "10:00": "Foco Estudo", "13:00": "Almoço", "15:00": "Revisão" }
+                };
+            }
+            return state.dailyLogs[dateStr];
+        }
+
         function loadDay(dateStr) {
             state.currentDateStr = dateStr;
-            const dateInput = document.getElementById('daily-date');
-            if(dateInput) dateInput.value = dateStr;
+            const log = ensureLog(dateStr);
+            const pCont = document.getElementById('daily-priorities');
+            pCont.innerHTML = [1,2,3].map(n => `
+                <div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all">
+                    <input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 border-primary/50 bg-transparent text-primary rounded-full focus:ring-0"/>
+                    <input type="text" class="dash-input text-sm flex-1 ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Definir prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/>
+                </div>`).join('');
+            const fCont = document.getElementById('daily-flow');
+            fCont.innerHTML = Object.entries(log.timeline).map(([time, task]) => `
+                <div class="relative group flex gap-4">
+                    <div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_10px_#8c2bee]"></div>
+                    <span class="text-[10px] text-primary font-bold w-10 font-mono pt-1">${time}</span>
+                    <div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary">
+                        <input type="text" class="dash-input text-sm" value="${task}" oninput="updateTimelineText('${time}', this.value)"/>
+                    </div>
+                </div>`).join('');
+            document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' });
+            document.getElementById('daily-date').value = dateStr;
+        }
 
-            const data = state.dailyLogs[dateStr] || { p1:'', p2:'', p3:'', dump:'', timeline:{}, bio:{water:0, sleep:'', workout:false, meds:false} };
-            
-            document.getElementById('p1').value = data.p1 || '';
-            document.getElementById('p2').value = data.p2 || '';
-            document.getElementById('p3').value = data.p3 || '';
-            document.getElementById('daily-dump').innerText = data.dump || '';
-            
-            const tl = document.getElementById('daily-timeline');
-            tl.innerHTML = '';
-            for(let h=7; h<=23; h++) {
-                const hour = h.toString().padStart(2, '0');
-                const content = (data.timeline && data.timeline[hour]) || '';
-                tl.innerHTML += `<div class="time-slot"><div class="ts-label">${hour}:00</div><div class="flex-1 px-2" contenteditable="true" oninput="saveDay()">${content}</div></div>`;
+        // --- 5. SIDEBAR E RADAR ---
+        function updateRadar() {
+            const log = ensureLog(state.currentDateStr);
+            const todayISO = getLocalTodayISO();
+            const sbPrios = document.getElementById('sidebar-priorities-content');
+            if(sbPrios) {
+                const list = [log.p1, log.p2, log.p3].filter(p => p && p.trim() !== "");
+                sbPrios.innerHTML = list.length > 0 ? list.map(p => `<div class="alert-card-sidebar"><p class="text-white text-xs">${p}</p></div>`).join('') : '<p class="text-white/20 text-[10px]">Sem prioridades.</p>';
             }
-            
-            const b = data.bio || {water:0, sleep:'', workout:false, meds:false};
-            document.getElementById('bio-water').innerText = '●'.repeat(b.water) + '○'.repeat(10-b.water);
-            document.getElementById('bio-sleep').innerText = (b.sleep || '____') + 'h';
-            document.getElementById('bio-workout').innerText = b.workout ? '[X]' : '[ ]';
-            document.getElementById('bio-meds').innerText = b.meds ? '[X]' : '[ ]';
-
-            // ATUALIZAÇÃO DO RÓTULO DO DIA (CORRIGIDO)
-            const dayNames = ['DOMINGO','SEGUNDA-FEIRA','TERÇA-FEIRA','QUARTA-FEIRA','QUINTA-FEIRA','SEXTA-FEIRA','SÁBADO'];
-            const d = new Date(dateStr + "T12:00:00");
-            const labelEl = document.getElementById('day-label');
-            if(labelEl) labelEl.innerText = dayNames[d.getDay()];
-
-            updateHUD();
+            const container = document.getElementById('radar-container');
+            const sbRadar = document.getElementById('sidebar-radar-content');
+            const upcoming = state.events.map(e => ({ ...e, diff: Math.ceil((new Date(e.date + "T12:00:00") - new Date(todayISO + "T12:00:00")) / 86400000) }))
+                .filter(e => e.diff >= 0).sort((a,b) => a.diff - b.diff);
+            const radarHtml = upcoming.slice(0, 5).map(ev => `
+                <div class="neon-border-wrapper shrink-0">
+                    <div class="bg-[#251b2e] h-full rounded-xl p-4 min-w-[180px] flex gap-3 items-center">
+                        <div class="z-10"><p class="text-white text-xs font-bold uppercase truncate">${ev.desc}</p><p class="text-pink-300 text-[10px]">${ev.diff === 0 ? 'HOJE' : ev.diff + ' d'}</p></div>
+                    </div>
+                </div>`).join('');
+            if(container) container.innerHTML = radarHtml || '<p class="text-white/20 text-[10px] px-4 font-bold uppercase">Radar Limpo</p>';
+            if(sbRadar) sbRadar.innerHTML = upcoming.map(ev => `<div class="alert-card-sidebar"><p class="text-white text-xs font-bold">${ev.desc}</p><p class="text-primary text-[9px] mt-1 font-black uppercase">${ev.diff === 0 ? 'HOJE' : 'em ' + ev.diff + ' dias'}</p></div>`).join('') || '<p class="text-white/20 text-[10px]">Sem eventos.</p>';
+            const sbRisks = document.getElementById('sidebar-risks-content');
+            const riskProj = state.projects.find(p => p.id === 'risk');
+            if(sbRisks && riskProj) {
+                sbRisks.innerHTML = riskProj.actions.filter(a => !a.done).map(a => `<div class="alert-card-sidebar" style="border-left-color: #ff7eb3"><p class="text-white text-xs">${a.text}</p></div>`).join('') || '<p class="text-white/20 text-[10px]">Sem riscos.</p>';
+            }
         }
 
-        function saveDay() {
-            const dateStr = state.currentDateStr;
-            if(!state.dailyLogs[dateStr]) state.dailyLogs[dateStr] = { timeline:{}, bio:{water:0, sleep:'', workout:false, meds:false} };
-            const d = state.dailyLogs[dateStr];
-            d.p1 = document.getElementById('p1').value;
-            d.p2 = document.getElementById('p2').value;
-            d.p3 = document.getElementById('p3').value;
-            d.dump = document.getElementById('daily-dump').innerText;
-            document.querySelectorAll('.time-slot').forEach(s => {
-                const h = s.querySelector('.ts-label').innerText.split(':')[0];
-                d.timeline[h] = s.querySelector('[contenteditable]').innerText;
-            });
-            saveState(); updateHUD();
+        // --- 6. CALENDÁRIO ---
+        function renderMonthly() {
+            const grid = document.getElementById('month-grid');
+            const title = document.getElementById('month-title');
+            grid.innerHTML = "";
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            title.innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+            const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
+            const lastDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+            const todayISO = getLocalTodayISO();
+            for (let i = 0; i < 42; i++) {
+                const dayNum = i - firstDay + 1;
+                const cell = document.createElement('div');
+                cell.className = "aspect-square glass-panel p-1 flex flex-col border border-white/5 relative cursor-pointer hover:bg-white/5 transition-all";
+                if (dayNum > 0 && dayNum <= lastDate) {
+                    const currentISO = `${viewDate.getFullYear()}-${(viewDate.getMonth()+1).toString().padStart(2,'0')}-${dayNum.toString().padStart(2,'0')}`;
+                    cell.onclick = () => addEventPrompt(currentISO);
+                    const header = document.createElement('div');
+                    header.className = `calendar-day-num text-[10px] mb-1 flex justify-between items-center ${currentISO === todayISO ? 'text-primary' : 'opacity-40'}`;
+                    header.innerHTML = `<span>${dayNum}</span>`;
+                    cell.appendChild(header);
+                    const evCont = document.createElement('div');
+                    evCont.className = "flex-1 overflow-y-auto hide-scrollbar space-y-1";
+                    state.events.filter(e => e.date === currentISO).forEach(ev => {
+                        const item = document.createElement('div');
+                        item.className = "bg-primary/20 text-[8px] p-1 rounded border border-primary/20 flex justify-between items-center";
+                        item.innerHTML = `<span class="truncate pr-1">${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-40 hover:opacity-100">delete</button>`;
+                        evCont.appendChild(item);
+                    });
+                    cell.appendChild(evCont);
+                } else { cell.classList.add('opacity-0'); cell.style.pointerEvents = 'none'; }
+                grid.appendChild(cell);
+            }
         }
+        function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderMonthly(); }
 
-        function toggleBio(type) {
-            if(!state.dailyLogs[state.currentDateStr]) saveDay();
-            const d = state.dailyLogs[state.currentDateStr];
-            if(type === 'water') d.bio.water = (d.bio.water + 1) % 11;
-            else if(type === 'workout') d.bio.workout = !d.bio.workout;
-            else if(type === 'meds') d.bio.meds = !d.bio.meds;
-            else if(type === 'sleep') d.bio.sleep = prompt("Horas de sono:", d.bio.sleep || "");
-            saveState(); loadDay(state.currentDateStr);
-        }
-
-        function setTemplate(type) {
-            document.querySelectorAll('.block-routine').forEach(e => e.remove());
-            const tl = document.getElementById('daily-timeline');
-            const add = (s, e, txt, style='grey') => {
-                const total = 17; const top = ((s-7)/total)*100; const h = ((e-s)/total)*100;
-                const div = document.createElement('div');
-                div.className = `block-routine block-${style}`; div.innerText = txt;
-                div.style.top = `calc(${top}% + 1px)`; div.style.height = `calc(${h}% - 2px)`;
-                tl.appendChild(div);
-            };
-            if(type === 'S-foco') add(8, 12, "BLOCO DE FOCO 🧠", "alert");
-            if(type === 'S-rotina') { add(9, 12, "ROTINA MANHÃ"); add(14, 18, "ROTINA TARDE"); add(20, 22, "PLANEJAMENTO / LEITURA", "dark"); }
-            if(type === 'S-descanso') add(8, 23, "MODO RECUPERAÇÃO 🌊", "grey");
-        }
-
-        // --- 6. PROJETOS ---
+        // --- 7. ROADMAP E TAREFAS ---
         function renderProj() {
-            const p = state.projects[state.currentProjId];
-            document.getElementById('proj-title').value = p.title;
-            document.getElementById('proj-why').value = p.why;
-            document.getElementById('proj-phases').innerHTML = (p.phases || []).map((x, i) => `<div class="proj-item"><input class="prio-input" value="${x}" oninput="state.projects['${state.currentProjId}'].phases[${i}]=this.value;saveState()"></div>`).join('');
-            document.getElementById('proj-actions').innerHTML = (p.actions || []).map((a, i) => {
-                const age = Math.floor((Date.now() - (a.created || Date.now())) / 86400000);
-                return `<div class="proj-item"><div class="prio-check" onclick="this.classList.toggle('checked')"></div><input class="prio-input flex-1" value="${a.text}" oninput="state.projects['${state.currentProjId}'].actions[${i}].text=this.value;saveState()">${age > 1 ? '<span class="aging-badge">+'+age+'d</span>' : ''}</div>`;
+            const list = document.getElementById('projects-list');
+            list.innerHTML = state.projects.map(p => {
+                const daysOld = Math.floor((Date.now() - p.created) / 86400000);
+                return `
+                <div class="glass-panel rounded-3xl p-5 border border-white/5 relative group">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
+                            <input type="text" class="dash-input font-bold text-base" value="${p.title}" oninput="updateProjTitle('${p.id}', this.value)"/>
+                            <p class="text-[9px] text-white/40 uppercase font-bold mt-1">Activo há ${daysOld}d</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 mt-4">
+                        ${p.actions.map((a, idx) => `
+                            <div class="p-3 bg-white/5 rounded-2xl border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" ${a.done ? 'checked' : ''} class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0" onchange="toggleAction('${p.id}', ${idx})"/>
+                                    <input type="text" class="dash-input text-[11px] flex-1 ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${p.id}', ${idx}, this.value)"/>
+                                    ${p.id === 'risk' ? `<button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg border border-primary/30 font-black">DIVIDIR</button>` : ''}
+                                    <button onclick="deleteAction('${p.id}', ${idx})" class="text-white/20 text-xs">×</button>
+                                </div>
+                                ${a.phases && a.phases.length > 0 ? `
+                                <div class="mt-3 ml-7 pl-3 border-l border-white/10 space-y-2">
+                                    ${a.phases.map((ph, pIdx) => `
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary rounded-sm bg-transparent border-white/10"/>
+                                            <input type="text" class="dash-input text-[10px] flex-1 ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/>
+                                        </div>`).join('')}
+                                    <button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary/60 font-bold uppercase">+ Adicionar Fase</button>
+                                </div>` : ''}
+                            </div>`).join('')}
+                    </div>
+                    <button onclick="addAction('${p.id}')" class="mt-4 text-[9px] text-primary font-bold uppercase">+ Add Task</button>
+                </div>`;
             }).join('');
         }
 
-        function addProjItem(type) {
-            const p = state.projects[state.currentProjId];
-            if(type==='phase') p.phases.push(""); else p.actions.push({text:"", created:Date.now()});
+        // --- 8. LOGICA CORE ---
+        function splitTask(idx) {
+            const p = state.projects.find(proj => proj.id === 'risk');
+            if(!p.actions[idx].phases) p.actions[idx].phases = [];
+            p.actions[idx].phases.push({ text: "Nova fase", done: false });
             saveState(); renderProj();
         }
-
-        function loadProject(id) { state.currentProjId = id; renderProj(); }
-
-        function newProject() {
-            const name = prompt("Nome do Objetivo:"); if(!name) return;
-            const id = 'p_' + Date.now();
-            state.projects[id] = { title: name, why: "", phases: ["Etapa 1"], actions: [{text: "Primeira ação", created: Date.now()}] };
-            saveState(); refreshProjSelect(); loadProject(id);
-        }
-
-        function refreshProjSelect() {
-            const ps = document.getElementById('proj-select');
-            if(!ps) return;
-            ps.innerHTML = '';
-            Object.entries(state.projects).forEach(([id, p]) => ps.innerHTML += `<option value="${id}">${p.title}</option>`);
-            ps.value = state.currentProjId;
-        }
-
-        function saveProj() {
-            const p = state.projects[state.currentProjId];
-            p.title = document.getElementById('proj-title').value;
-            p.why = document.getElementById('proj-why').value;
-            saveState();
-        }
-
-        // --- 7. CONTEXTOS ---
+        function addPhaseToTask(idx) { state.projects.find(p => p.id === 'risk').actions[idx].phases.push({text:"", done:false}); saveState(); renderProj(); }
+        function updatePhaseText(idx, pIdx, val) { state.projects.find(p => p.id === 'risk').actions[idx].phases[pIdx].text = val; saveState(); }
+        function togglePhase(idx, pIdx) { const ph = state.projects.find(p => p.id === 'risk').actions[idx].phases[pIdx]; ph.done = !ph.done; saveState(); renderProj(); }
+        function toggleAction(pId, idx) { const p = state.projects.find(p => p.id === pId); p.actions[idx].done = !p.actions[idx].done; saveState(); renderProj(); }
+        function updateActionText(pId, idx, val) { state.projects.find(p => p.id === pId).actions[idx].text = val; saveState(); }
+        function deleteAction(pId, idx) { state.projects.find(p => p.id === pId).actions.splice(idx, 1); saveState(); renderProj(); }
+        function updateProjTitle(id, val) { state.projects.find(p => p.id === id).title = val; saveState(); }
+        function addNewProject() { state.projects.push({ id: 'p'+Date.now(), title: "Novo Objetivo", created: Date.now(), why: "", actions: [{text: "", done: false, phases:[]}] }); saveState(); renderProj(); }
+        function addAction(pId) { state.projects.find(p => p.id === pId).actions.push({text: "", done: false, phases:[]}); saveState(); renderProj(); }
         function initContexts() {
             ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => {
                 const el = document.getElementById('ctx-'+k);
                 if(!el) return;
                 el.innerHTML = (state.contexts[k] || []).map((item, idx) => `
-                    <div class="context-item">
-                        <div class="prio-check ${item.done ? 'checked' : ''}" onclick="state.contexts['${k}'][${idx}].done=!state.contexts['${k}'][${idx}].done;saveState();initContexts()"></div>
-                        <input class="ctx-input" value="${item.text}" oninput="state.contexts['${k}'][${idx}].text=this.value;saveState()">
+                    <div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all">
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0"/>
+                        <input type="text" class="dash-input text-[11px] flex-1 ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/>
+                        <button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs hover:text-red-400">×</button>
                     </div>`).join('');
             });
         }
         function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
+        function updateContextItem(k, idx, val) { state.contexts[k][idx].text = val; saveState(); }
+        function toggleContextCheck(k, idx) { state.contexts[k][idx].done = !state.contexts[k][idx].done; saveState(); initContexts(); }
+        function deleteContextItem(k, idx) { state.contexts[k].splice(idx, 1); saveState(); initContexts(); }
         function clearDoneContexts() { Object.keys(state.contexts).forEach(k => state.contexts[k] = state.contexts[k].filter(i => !i.done)); saveState(); initContexts(); }
-
-        // --- 8. OUTROS ---
-        function renderWeekly() {
-            const grid = document.getElementById('week-grid'); if(!grid) return;
-            grid.innerHTML = '';
-            const val = document.getElementById('week-start').value || getLocalTodayISO();
-            const d = new Date(val + "T12:00:00");
-            const day = d.getDay();
-            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-            const start = new Date(d.setDate(diff));
-            const end = new Date(start); end.setDate(start.getDate()+6);
-            document.getElementById('week-label').innerText = `Período: ${start.toLocaleDateString()} a ${end.toLocaleDateString()}`;
-            const names = ['SEG','TER','QUA','QUI','SEX','SÁB','DOM'];
-            names.forEach((name, i) => {
-                const curr = new Date(start); curr.setDate(start.getDate()+i);
-                grid.innerHTML += `<div class="wk-col"><div class="wk-header">${name} <br> ${curr.getDate()}</div><div class="wk-body" contenteditable="true"></div><div class="wk-footer"><span>💤</span><span>💧</span><span>🏋️</span></div></div>`;
-            });
-        }
-
-        function renderMonthly() {
-            const grid = document.getElementById('month-grid'); if(!grid) return;
-            grid.innerHTML = '';
-            const val = document.getElementById('month-start').value || getLocalTodayISO();
-            const d = new Date(val + "T12:00:00");
-            const start = new Date(d.setDate(d.getDate() - (d.getDay() || 7) + 1));
-            for(let i=0; i<35; i++) {
-                const curr = new Date(start); curr.setDate(start.getDate()+i);
-                const iso = curr.toISOString().split('T')[0];
-                const ev = state.events.find(e => e.date === iso);
-                grid.innerHTML += `<div class="m-cell"><div class="text-right text-[10px] font-bold">${curr.getDate()}</div><div class="m-content" contenteditable="true"></div>${ev ? '<div class="event-tag tag-crit">'+ev.desc+'</div>' : ''}</div>`;
-            }
-            document.getElementById('month-title').innerText = new Date(val + "T12:00:00").toLocaleString('pt-BR', {month:'long'}).toUpperCase();
-        }
-
-        function renderAnnual() {
-            const y = document.getElementById('year-val').value;
-            document.getElementById('year-disp').innerText = y;
-            const ms = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
-            for(let i=1; i<=4; i++) {
-                const el = document.getElementById('q'+i); if(!el) continue;
-                el.innerHTML = `<div style="text-align:center; font-weight:bold; border-bottom:1px solid #000;">Q${i}</div>`;
-                for(let j=0; j<3; j++) {
-                    el.innerHTML += `<div style="border:1px solid #ccc; flex:1; padding:5px; font-size:0.7rem; display:flex; flex-direction:column;"><div style="font-weight:bold; border-bottom:1px solid #eee;">${ms[(i-1)*3+j]}</div><div style="flex:1" contenteditable="true"></div></div>`;
-                }
-            }
-        }
-
-        function changeDay(delta) { 
-            const d = new Date(state.currentDateStr + "T12:00:00"); 
-            d.setDate(d.getDate()+delta); 
-            loadDay(d.toISOString().split('T')[0]); 
-        }
-
-        function goToToday() { 
-            loadDay(getLocalTodayISO()); 
-        }
-
-        function resetDaily() {
-            if(confirm("Deseja limpar todos os campos deste dia?")) {
-                state.dailyLogs[state.currentDateStr] = { p1:'', p2:'', p3:'', dump:'', timeline:{}, bio:{water:0, sleep:'', workout:false, meds:false} };
-                saveState(); loadDay(state.currentDateStr);
-            }
-        }
-
-        function loadDayFromInput() { 
-            const val = document.getElementById('daily-date').value;
-            if(val) loadDay(val); 
-        }
-
-        function addCritical() { 
-            const d = document.getElementById('new-crit-date').value;
-            const t = document.getElementById('new-crit-desc').value;
-            if(!d || !t) return;
-            state.events.push({date: d, desc: t, id: Date.now()}); 
-            saveState(); renderMonthly(); updateHUD(); 
-        }
-
-        function generateImage() { 
-            html2canvas(document.querySelector('.paper.active'), { scale: 2 }).then(canvas => { 
-                document.getElementById('img-preview').src = canvas.toDataURL(); 
-                document.getElementById('dl-link').href = canvas.toDataURL();
-                document.getElementById('modal').style.display = 'flex'; 
-            }); 
-        }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function addEventPrompt(date = null) { const d = date || prompt("Data (AAAA-MM-DD):", getLocalTodayISO()); const desc = prompt("O que é este evento?"); if(d && desc) { state.events.push({date: d, desc, id: Date.now()}); saveState(); renderAll(); } }
+        function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderAll(); }
         function togglePrio(n, el) { el.classList.toggle('checked'); saveDay(); }
+        function togglePriority(n) { const log = ensureLog(state.currentDateStr); log['p'+n+'_done'] = !log['p'+n+'_done']; saveState(); loadDay(state.currentDateStr); }
+        function updatePriorityText(n, val) { const log = ensureLog(state.currentDateStr); log['p'+n] = val; saveState(); }
+        function updateTimelineText(time, val) { const log = ensureLog(state.currentDateStr); log.timeline[time] = val; saveState(); }
+        function updateDumpText(val) { state.dump = val; saveState(); }
+        function changeDay(delta) { const d = new Date(state.currentDateStr + "T12:00:00"); d.setDate(d.getDate() + delta); state.currentDateStr = d.toISOString().split('T')[0]; renderAll(); saveState(); }
+        function loadDayFromInput() { loadDay(document.getElementById('daily-date').value); saveState(); }
+        function resetDaily() { if(confirm("Apagar dia?")) { state.dailyLogs[state.currentDateStr] = null; delete state.inkData[`ink_${state.currentDateStr}`]; renderAll(); saveState(); } }
+        function closeModal() { document.getElementById('modal').classList.replace('flex', 'hidden'); }
+        function generateScreenshot() { saveDrawingToState(); html2canvas(document.getElementById('main-scroll-area'), { scale: 2, backgroundColor: "#191022", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
 
-        // --- INITIALIZATION ---
         window.onload = function() {
-            if(window.lucide) window.lucide.createIcons();
-            refreshProjSelect();
-            loadDay(state.currentDateStr);
-            renderProj();
-            window.dispatchEvent(new Event('resize'));
+            lucide.createIcons();
+            resizeCanvas();
+            renderAll();
+            window.addEventListener('resize', resizeCanvas);
         };
     </script>
 </body>
