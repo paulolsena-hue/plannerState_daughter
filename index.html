@@ -276,7 +276,34 @@
                 <div id="view-projects" class="view-content space-y-8 relative z-10 text-white"><h3 class="text-white text-lg font-bold flex items-center gap-2"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 block"></span> Roadmap 2026</h3><div id="projects-list" class="space-y-3"></div><button onclick="addNewProject()" class="w-full py-4 rounded-2xl border border-dashed border-white/10 text-white/30 text-xs font-bold hover:bg-white/5 transition-all uppercase tracking-widest">+ New Objective</button></div>
 
                 <!-- VIEW: BRAIN DUMP -->
-                <div id="view-dump" class="view-content relative z-10"><h3 class="text-white text-lg font-bold flex items-center gap-2 text-white"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-green-400 to-emerald-600 block"></span> Brain Dump</h3><div class="w-full h-80 bg-white/5 rounded-3xl p-6 border border-white/10 bg-dot-pattern bg-dot-size relative group"><textarea id="brain-dump-text" class="w-full h-full bg-transparent border-none resize-none focus:ring-0 text-sm text-white/80 leading-relaxed" placeholder="Anote qualquer pensamento aqui..." oninput="updateDumpText(this.value)"></textarea></div></div>
+                <div id="view-dump" class="view-content relative z-10">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-white text-lg font-bold flex items-center gap-2 text-white">
+                            <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-green-400 to-emerald-600 block"></span> 
+                            Brain Dump
+                        </h3>
+                        <div class="flex gap-2">
+                            <button onclick="clearDump()" class="p-2 glass-panel rounded-xl hover:bg-rose-500/20 text-rose-400 transition-all flex items-center gap-1 text-[10px] font-bold uppercase">
+                                <span class="material-symbols-outlined text-[18px]">auto_fix_high</span> Limpar
+                            </button>
+                            <button onclick="archiveDump()" class="p-2 glass-panel rounded-xl hover:bg-primary/20 text-primary transition-all flex items-center gap-1 text-[10px] font-bold uppercase">
+                                <span class="material-symbols-outlined text-[18px]">archive</span> Arquivar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full h-80 bg-white/5 rounded-3xl p-6 border border-white/10 bg-dot-pattern bg-dot-size relative group">
+                        <textarea id="brain-dump-text" class="w-full h-full bg-transparent border-none resize-none focus:ring-0 text-sm text-white/80 leading-relaxed" placeholder="Anote qualquer pensamento aqui..." oninput="updateDumpText(this.value)"></textarea>
+                    </div>
+
+                    <!-- Histórico de Brain Dump -->
+                    <div class="mt-8 space-y-4">
+                        <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] px-2">Histórico de Registros</p>
+                        <div id="dump-history-list" class="space-y-3">
+                            <!-- Injetado via JS -->
+                        </div>
+                    </div>
+                </div>
 
                 <!-- VIEW: MONTHLY -->
                 <div id="view-monthly" class="view-content space-y-6 relative z-10">
@@ -401,11 +428,13 @@
                     dailyLogs: {},
                     inkData: {},
                     dump: "",
+                    dumpHistory: [],
                     contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] }
                 };
             }
 
-            // Sanitização e Reparação do Estado (Garantia para listas de contexto)
+            // Sanitização
+            if(!state.dumpHistory) state.dumpHistory = [];
             if(!state.contexts) state.contexts = { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] };
             ['casa', 'compras', 'adm', 'imp_urg', 'imp_not_urg'].forEach(k => {
                 if(!state.contexts[k]) state.contexts[k] = [];
@@ -425,13 +454,62 @@
                 const { error } = await supabaseClient
                     .from('user_settings')
                     .upsert({ user_id: currentUser.id, full_state: state, updated_at: new Date() });
-                if(error) console.error("Erro Supabase:", error);
                 document.getElementById('sync-indicator').classList.remove('active');
                 updateRadar();
             }, 800);
         }
 
-        // --- UI & LOGIC ---
+        // --- BRAIN DUMP LOGIC ---
+        function clearDump() {
+            if(confirm("Limpar anotação atual? (Isso não apaga o histórico)")) {
+                state.dump = "";
+                document.getElementById('brain-dump-text').value = "";
+                saveState();
+            }
+        }
+
+        function archiveDump() {
+            if(!state.dump || state.dump.trim() === "") return;
+            
+            const now = new Date();
+            const timestamp = now.toLocaleString('pt-BR');
+            
+            state.dumpHistory.unshift({
+                id: Date.now(),
+                text: state.dump,
+                time: timestamp
+            });
+            
+            state.dump = "";
+            document.getElementById('brain-dump-text').value = "";
+            saveState();
+            renderDumpHistory();
+        }
+
+        function deleteHistoryItem(id) {
+            if(confirm("Excluir este registro do histórico permanentemente?")) {
+                state.dumpHistory = state.dumpHistory.filter(h => h.id !== id);
+                saveState();
+                renderDumpHistory();
+            }
+        }
+
+        function renderDumpHistory() {
+            const list = document.getElementById('dump-history-list');
+            if(!list) return;
+            
+            list.innerHTML = state.dumpHistory.map(h => `
+                <div class="glass-panel p-4 rounded-2xl border border-white/5 relative group animate-in slide-in-from-top duration-300">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[9px] font-black text-primary uppercase tracking-widest">${h.time}</span>
+                        <button onclick="deleteHistoryItem(${h.id})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-rose-400 transition-all opacity-0 group-hover:opacity-100">delete</button>
+                    </div>
+                    <p class="text-xs text-white/70 whitespace-pre-wrap leading-relaxed">${h.text}</p>
+                </div>
+            `).join('') || '<p class="text-white/20 text-[10px] text-center py-4">Nenhum registro arquivado.</p>';
+        }
+
+        // --- UI & CORE LOGIC ---
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -492,23 +570,36 @@
 
         function renderProj() { const list = document.getElementById('projects-list'); list.innerHTML = state.projects.map(p => `<div class="glass-panel rounded-3xl p-5 border border-white/5 relative group"><div class="flex justify-between items-start mb-3"><div class="flex-1"><input type="text" class="dash-input font-bold text-base text-white" value="${p.title}" oninput="updateProjTitle('${p.id}', this.value)"/><p class="text-[9px] uppercase font-bold mt-1 text-white/40">ROADMAP ATIVO</p></div></div><div class="space-y-3 mt-4">${p.actions.map((a, idx) => `<div class="p-3 bg-white/5 rounded-2xl border border-white/5"><div class="flex items-center gap-3"><input type="checkbox" ${a.done ? 'checked' : ''} class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0" onchange="toggleAction('${p.id}', ${idx})"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${p.id}', ${idx}, this.value)"/><button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg border border-primary/30 font-black transition-all hover:bg-primary/40">DIVIDIR</button><button onclick="deleteAction('${p.id}', ${idx})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-red-400">delete</button></div>${a.phases && a.phases.length > 0 ? `<div class="mt-3 ml-7 pl-3 border-l border-white/10 space-y-2">${a.phases.map((ph, pIdx) => `<div class="flex items-center gap-2"><input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary bg-transparent border-white/10 rounded-sm"/><input type="text" class="dash-input text-[10px] flex-1 text-white ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/></div>`).join('')}<button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary/60 font-bold uppercase transition-all hover:opacity-100">+ FASE</button></div>` : ''}</div>`).join('')}</div><button onclick="addAction('${p.id}')" class="mt-4 text-[9px] text-primary font-bold uppercase transition-all hover:opacity-100">+ Add Task</button></div>`).join(''); }
 
-        function renderMonthly() { const grid = document.getElementById('month-grid'); const title = document.getElementById('month-title'); grid.innerHTML = ""; const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; title.innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`; const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay(); const lastDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate(); const todayISO = getLocalTodayISO(); for (let i = 0; i < 42; i++) { const dayNum = i - firstDay + 1; const cell = document.createElement('div'); cell.className = "aspect-square glass-panel p-1 flex flex-col border border-white/5 relative cursor-pointer hover:bg-white/5"; if (dayNum > 0 && dayNum <= lastDate) { const currentISO = `${viewDate.getFullYear()}-${(viewDate.getMonth()+1).toString().padStart(2,'0')}-${dayNum.toString().padStart(2,'0')}`; cell.onclick = () => addEventPrompt(currentISO); cell.innerHTML = `<div class="calendar-day-num text-[10px] mb-1 ${currentISO === todayISO ? 'text-primary' : 'opacity-40'}">${dayNum}</div><div class="flex-1 overflow-y-auto hide-scrollbar space-y-1"></div>`; state.events.filter(e => e.date === currentISO).forEach(ev => { const item = document.createElement('div'); item.className = "bg-primary/20 text-[8px] p-1 rounded border border-primary/20 flex justify-between items-center"; item.innerHTML = `<span class="truncate pr-1 text-white">${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-40 hover:opacity-100">delete</button>`; cell.querySelector('div:last-child').appendChild(item); }); } else { cell.classList.add('opacity-0'); cell.style.pointerEvents = 'none'; } grid.appendChild(cell); } }
+        function renderMonthly() { const grid = document.getElementById('month-grid'); const title = document.getElementById('month-title'); if(!grid || !title) return; grid.innerHTML = ""; const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; title.innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`; const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay(); const lastDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate(); const todayISO = getLocalTodayISO(); for (let i = 0; i < 42; i++) { const dayNum = i - firstDay + 1; const cell = document.createElement('div'); cell.className = "aspect-square glass-panel p-1 flex flex-col border border-white/5 relative cursor-pointer hover:bg-white/5"; if (dayNum > 0 && dayNum <= lastDate) { const currentISO = `${viewDate.getFullYear()}-${(viewDate.getMonth()+1).toString().padStart(2,'0')}-${dayNum.toString().padStart(2,'0')}`; cell.onclick = () => addEventPrompt(currentISO); cell.innerHTML = `<div class="calendar-day-num text-[10px] mb-1 ${currentISO === todayISO ? 'text-primary' : 'opacity-40'}">${dayNum}</div><div class="flex-1 overflow-y-auto hide-scrollbar space-y-1"></div>`; state.events.filter(e => e.date === currentISO).forEach(ev => { const item = document.createElement('div'); item.className = "bg-primary/20 text-[8px] p-1 rounded border border-primary/20 flex justify-between items-center"; item.innerHTML = `<span class="truncate pr-1 text-white">${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-40">delete</button>`; cell.querySelector('div:last-child').appendChild(item); }); } else { cell.classList.add('opacity-0'); cell.style.pointerEvents = 'none'; } grid.appendChild(cell); } }
         function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderMonthly(); }
 
         function initContexts() { 
             ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { 
                 const el = document.getElementById('ctx-'+k); 
                 if(!el) return; 
-                el.innerHTML = (state.contexts[k] || []).map((item, idx) => `
-                <div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs hover:text-red-400">×</button></div>`).join(''); 
+                el.innerHTML = (state.contexts[k] || []).map((item, idx) => `<div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs hover:text-red-400">×</button></div>`).join(''); 
             }); 
         }
+
+        function renderAll() {
+            const view = state.activeView;
+            if(view === 'daily') loadDay(state.currentDateStr);
+            if(view === 'projects') renderProj();
+            if(view === 'monthly') renderMonthly();
+            if(view === 'contexts') initContexts();
+            if(view === 'dump') {
+                document.getElementById('brain-dump-text').value = state.dump || "";
+                renderDumpHistory();
+            }
+            updateRadar();
+            loadDrawingFromState();
+        }
+
         function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
         function updateContextItem(k, idx, val) { state.contexts[k][idx].text = val; saveState(); }
         function toggleContextCheck(k, idx) { state.contexts[k][idx].done = !state.contexts[k][idx].done; saveState(); initContexts(); }
         function deleteContextItem(k, idx) { state.contexts[k].splice(idx, 1); saveState(); initContexts(); }
         function clearDoneContexts() { Object.keys(state.contexts).forEach(k => state.contexts[k] = state.contexts[k].filter(i => !i.done)); saveState(); initContexts(); }
-        
         function togglePriority(n) { const log = ensureLog(state.currentDateStr); log['p'+n+'_done'] = !log['p'+n+'_done']; saveState(); loadDay(state.currentDateStr); }
         function updatePriorityText(n, val) { const log = ensureLog(state.currentDateStr); log['p'+n] = val; saveState(); }
         function updateTimelineText(time, val) { const log = ensureLog(state.currentDateStr); log.timeline[time] = val; saveState(); }
@@ -518,7 +609,7 @@
         function resetDaily() { if(confirm("Limpar dia?")) { state.dailyLogs[state.currentDateStr] = null; delete state.inkData[`ink_${state.currentDateStr}`]; renderAll(); saveState(); } }
         function addEventPrompt(date = null) { const d = date || prompt("AAAA-MM-DD"); const t = prompt("Evento:"); if(d && t) { state.events.push({date: d, desc: t, id: Date.now()}); saveState(); renderAll(); } }
         function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderAll(); }
-        function closeModal() { document.getElementById('modal').classList.replace('flex', 'hidden'); }
+        function closeModal() { document.getElementById('modal').classList.replace('hidden', 'flex'); }
         function generateScreenshot() { saveDrawingToState(); html2canvas(document.getElementById('main-scroll-area'), { scale: 2, backgroundColor: "#191022", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
 
         window.onload = () => { checkSession(); window.addEventListener('resize', resizeCanvas); };
