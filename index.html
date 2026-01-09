@@ -149,19 +149,20 @@
         
         <div class="auth-card glass-panel relative z-10 text-center">
             <div class="mb-8">
-                <div class="bg-center bg-no-repeat bg-cover rounded-full h-20 w-20 ring-2 ring-primary/50 shadow-xl mx-auto mb-4" style='background-image: url("https://avatarfiles.alphacoders.com/374/374567.png");'></div>
+                <!-- Logotipo Lótus Minimalista -->
+                <div class="bg-center bg-no-repeat bg-contain rounded-full h-20 w-20 ring-2 ring-primary/50 shadow-xl mx-auto mb-4 p-4 bg-background-dark/50 backdrop-blur-md" style='background-image: url("https://api.iconify.design/solar:lotus-bold-duotone.svg?color=%238c2bee");'></div>
                 <h2 class="text-2xl font-bold tracking-tight mb-2" style="color: var(--text-color)">Planner OS</h2>
-                <p class="text-sm opacity-40" style="color: var(--text-color)" id="auth-subtitle">Entre para acessar seu dashboard</p>
+                <p class="text-sm opacity-40" style="color: var(--text-color)" id="auth-subtitle">Sincronize o seu foco na nuvem</p>
             </div>
 
             <div class="space-y-4" id="auth-form">
                 <div class="text-left">
                     <label class="text-[10px] font-black text-primary uppercase ml-4 mb-1 block">Email</label>
-                    <input type="email" id="email" placeholder="email@exemplo.com" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all"/>
+                    <input type="email" id="email" placeholder="email@exemplo.com" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all text-white"/>
                 </div>
                 <div class="text-left">
                     <label class="text-[10px] font-black text-primary uppercase ml-4 mb-1 block">Senha</label>
-                    <input type="password" id="password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all"/>
+                    <input type="password" id="password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all text-white"/>
                 </div>
                 
                 <button onclick="handleAuth()" id="main-auth-btn" class="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all mt-4">Entrar</button>
@@ -204,13 +205,14 @@
         <header class="relative z-50 flex p-6 items-center justify-between shrink-0">
             <div class="flex gap-4 items-center">
                 <div class="relative">
-                    <button onclick="toggleSidebar()" class="absolute -top-1 -left-1 z-10 bg-primary h-6 w-6 rounded-full flex items-center justify-center border-2 border-background-dark shadow-lg"><span class="material-symbols-outlined text-[14px] text-white">menu</span></button>
-                    <div class="bg-center bg-no-repeat bg-cover rounded-full h-14 w-14 ring-2 ring-primary/50 shadow-lg" style='background-image: url("https://avatarfiles.alphacoders.com/374/374567.png");'></div>
+                    <button onclick="toggleSidebar()" class="absolute -top-1 -left-1 z-10 bg-primary h-6 w-6 rounded-full flex items-center justify-center border-2 border-background-dark shadow-lg transition-transform active:scale-90"><span class="material-symbols-outlined text-[14px] text-white">menu</span></button>
+                    <!-- Logotipo Lótus Minimalista -->
+                    <div class="bg-center bg-no-repeat bg-contain rounded-full h-14 w-14 ring-2 ring-primary/50 shadow-lg p-2 bg-background-dark/50" style='background-image: url("https://api.iconify.design/solar:lotus-bold-duotone.svg?color=%238c2bee");'></div>
                 </div>
-                <div><p class="text-xs font-medium tracking-wider uppercase opacity-60" style="color: var(--text-color)" id="header-day-label">CARREGANDO...</p><p class="text-xl font-bold leading-tight" style="color: var(--text-color)">Min-ji</p></div>
+                <div><p class="text-xs font-medium tracking-wider uppercase opacity-60" style="color: var(--text-color)" id="header-day-label">CARREGANDO...</p><p class="text-xl font-bold leading-tight" style="color: var(--text-color)">Planner OS</p></div>
             </div>
             <div class="flex items-center gap-2">
-                <!-- Seletor Binário de Tema -->
+                <!-- Seletor de Tema -->
                 <button onclick="toggleTheme()" class="theme-toggle-btn glass-panel transition-all hover:scale-110 active:scale-95" title="Mudar Tema">
                     <span class="material-symbols-outlined text-primary" id="theme-icon">dark_mode</span>
                 </button>
@@ -218,7 +220,7 @@
             </div>
         </header>
 
-        <!-- Radar Feed -->
+        <!-- Radar Alertas Feed -->
         <div class="relative z-10 flex flex-col gap-2 mb-2 shrink-0">
             <div class="px-6"><h3 class="text-[10px] font-bold tracking-[0.2em] flex items-center gap-2 opacity-90" style="color: var(--text-color)"><span class="material-symbols-outlined text-pink-400 text-[16px]">local_florist</span> ATTENTION RADAR</h3></div>
             <div class="flex overflow-x-auto hide-scrollbar px-6 py-2 gap-4 pb-4" id="radar-container"></div>
@@ -226,7 +228,7 @@
 
         <!-- Main Viewport -->
         <div class="relative z-10 flex-1 glass-panel rounded-t-[2.5rem] mt-2 border-b-0 border-x-0 mx-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
-            <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/20 rounded-full z-50"></div>
+            <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full z-50"></div>
             <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-8 pb-32 relative transition-all duration-500" id="main-scroll-area">
                 
                 <!-- VIEW: DAILY -->
@@ -245,7 +247,7 @@
 
                 <!-- VIEW: CONTEXTS -->
                 <div id="view-contexts" class="view-content space-y-8 relative z-10">
-                    <div class="flex justify-between items-center"><h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span> Listas de Contexto</h3><button onclick="clearDoneContexts()" class="text-[9px] font-bold text-primary uppercase tracking-widest">Limpar Feitos</button></div>
+                    <div class="flex justify-between items-center text-white"><h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span> Listas de Contexto</h3><button onclick="clearDoneContexts()" class="text-[9px] font-bold text-primary uppercase tracking-widest">Limpar Feitos</button></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-rose-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🔥 Urgente</p><div id="ctx-imp_urg" class="space-y-2"></div><button onclick="addContextItem('imp_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase hover:opacity-100 transition-opacity" style="color: var(--text-color)">+ Novo</button></div>
                         <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">📅 Importante</p><div id="ctx-imp_not_urg" class="space-y-2"></div><button onclick="addContextItem('imp_not_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase hover:opacity-100 transition-opacity" style="color: var(--text-color)">+ Novo</button></div>
@@ -255,10 +257,10 @@
                 </div>
 
                 <!-- VIEW: PROJECTS -->
-                <div id="view-projects" class="view-content space-y-8 relative z-10"><h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 block"></span> Roadmap 2026</h3><div id="projects-list" class="space-y-3"></div><button onclick="addNewProject()" class="w-full py-4 rounded-2xl border border-dashed border-primary/30 text-primary text-xs font-bold hover:bg-primary/5 transition-all uppercase tracking-widest">+ New Objective</button></div>
+                <div id="view-projects" class="view-content space-y-8 relative z-10 text-white"><h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 block"></span> Roadmap 2026</h3><div id="projects-list" class="space-y-3"></div><button onclick="addNewProject()" class="w-full py-4 rounded-2xl border border-dashed border-primary/30 text-primary text-xs font-bold hover:bg-primary/5 transition-all uppercase tracking-widest">+ New Objective</button></div>
 
                 <!-- VIEW: BRAIN DUMP -->
-                <div id="view-dump" class="view-content relative z-10">
+                <div id="view-dump" class="view-content relative z-10 text-white">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-green-400 to-emerald-600 block"></span> Brain Dump</h3>
                         <div class="flex gap-2">
@@ -273,7 +275,7 @@
                 </div>
 
                 <!-- VIEW: MONTHLY -->
-                <div id="view-monthly" class="view-content space-y-6 relative z-10">
+                <div id="view-monthly" class="view-content space-y-6 relative z-10 text-white">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span> Agenda Mensal</h3>
                         <div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
@@ -308,7 +310,7 @@
             <h3 class="text-white text-xl font-bold mb-2">Export Concluído</h3>
             <img id="img-preview" class="w-full rounded-2xl border border-white/5 mb-8" src=""/>
             <div class="flex gap-4 w-full">
-                <a id="dl-link" download="planner.png" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold text-center">Salvar</a>
+                <a id="dl-link" download="planner.png" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold text-center">Salvar Image</a>
                 <button onclick="closeModal()" class="px-8 bg-white/5 text-white rounded-2xl font-bold">Fechar</button>
             </div>
         </div>
@@ -327,8 +329,7 @@
 
         // THEME LOGIC
         function toggleTheme() {
-            const isLight = document.documentElement.classList.toggle('light');
-            document.documentElement.classList.toggle('dark', !isLight);
+            const isLight = !document.documentElement.classList.contains('light');
             state.theme_mode = isLight ? 'light' : 'dark';
             applyThemeProperties();
             saveState();
@@ -373,7 +374,7 @@
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
             document.getElementById('main-auth-btn').innerText = isSignUpMode ? "Criar Conta" : "Entrar";
-            document.getElementById('auth-subtitle').innerText = isSignUpMode ? "Crie seu acesso pessoal" : "Dashboard da Min-ji";
+            document.getElementById('auth-subtitle').innerText = isSignUpMode ? "Crie seu acesso pessoal" : "Dashboard do Planner OS";
         }
         function showAuthError(msg) { const errorEl = document.getElementById('auth-error'); errorEl.innerText = msg; errorEl.classList.remove('hidden'); }
         async function checkSession() {
@@ -415,7 +416,17 @@
         // NAVIGATION
         function toggleSidebar() { const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebar-overlay'); if (sb.classList.contains('-translate-x-full')) { sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); setTimeout(() => ov.classList.add('opacity-100'), 10); updateRadar(); } else { sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); ov.classList.remove('opacity-100'); } }
         function toggleBottomNav() { const isHidden = document.getElementById('bottom-nav').classList.toggle('nav-hidden'); document.getElementById('main-scroll-area').classList.toggle('content-expanded', isHidden); document.getElementById('nav-toggle-icon').innerText = isHidden ? "visibility_off" : "visibility"; }
-        function nav(viewId) { document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('bg-primary', 'text-white', 'shadow-lg'); b.classList.add('text-white/40'); }); document.getElementById('view-' + viewId).classList.add('active'); const btn = document.getElementById('btn-' + viewId); if(btn) { btn.classList.remove('text-white/40'); btn.classList.add('bg-primary', 'text-white', 'shadow-lg'); } state.activeView = viewId; renderAll(); if(window.innerWidth < 1024 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) toggleSidebar(); }
+        function nav(viewId) { 
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active')); 
+            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('bg-primary', 'text-white', 'shadow-lg'); b.classList.add('text-white/40'); }); 
+            document.getElementById('view-' + viewId).classList.add('active'); 
+            const btn = document.getElementById('btn-' + viewId); 
+            if(btn) { btn.classList.remove('text-white/40'); btn.classList.add('bg-primary', 'text-white', 'shadow-lg'); } 
+            state.activeView = viewId; 
+            renderAll(); 
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+        }
 
         // BRAIN DUMP
         function updateDumpText(v) { state.dump = v; saveState(); }
@@ -425,7 +436,7 @@
         function renderDumpHistory() { const list = document.getElementById('dump-history-list'); if(!list) return; list.innerHTML = (state.dumpHistory || []).map(h => `<div class="glass-panel p-4 rounded-2xl border border-white/5 group relative"><div class="flex justify-between items-start mb-2"><span class="text-[9px] font-black text-primary uppercase tracking-widest">${h.time}</span><button onclick="deleteHistoryItem(${h.id})" class="material-symbols-outlined text-[16px] opacity-40 hover:opacity-100 transition-all" style="color: var(--text-color)">delete</button></div><p class="text-xs opacity-70 whitespace-pre-wrap" style="color: var(--text-color)">${h.text}</p></div>`).join('') || '<p class="text-white/20 text-[10px] text-center">Vazio.</p>'; }
 
         // ROADMAP
-        function renderProj() { const list = document.getElementById('projects-list'); if(!list) return; list.innerHTML = (state.projects || []).map(p => `<div class="glass-panel rounded-3xl p-5 border border-white/5 relative group"><div class="flex justify-between mb-3"><div class="flex-1"><input type="text" class="dash-input font-bold text-base" style="color: var(--text-color)" value="${p.title}" oninput="updateProjTitle('${String(p.id)}', this.value)"/><p class="text-[9px] uppercase font-bold opacity-40" style="color: var(--text-color)">ROADMAP ATIVO</p></div><button onclick="deleteProject('${String(p.id)}')" class="material-symbols-outlined opacity-30 hover:opacity-100" style="color: var(--text-color)">delete</button></div><div class="space-y-3 mt-4">${(p.actions || []).map((a, idx) => `<div class="p-3 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2"><div class="flex items-center gap-3"><input type="checkbox" ${a.done ? 'checked' : ''} onchange="toggleAction('${String(p.id)}', ${idx})" class="h-4 w-4 text-primary rounded-full"/><input type="text" class="dash-input text-[11px] flex-1 ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${String(p.id)}', ${idx}, this.value)"/>${p.id === 'risk' ? `<button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg">DIVIDIR</button>` : ''}<button onclick="deleteAction('${String(p.id)}', ${idx})" class="material-symbols-outlined text-[16px] opacity-30" style="color: var(--text-color)">delete</button></div>${a.phases && a.phases.length > 0 ? `<div class="ml-7 pl-3 border-l border-primary/20 space-y-2">${a.phases.map((ph, pIdx) => `<div class="flex items-center gap-2"><input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary"/><input type="text" class="dash-input text-[10px] flex-1 ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/></div>`).join('')}<button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary font-bold uppercase">+ FASE</button></div>` : ''}</div>`).join('')}</div><button onclick="addAction('${String(p.id)}')" class="mt-4 text-[9px] text-primary font-bold">+ Add Task</button></div>`).join(''); }
+        function renderProj() { const list = document.getElementById('projects-list'); if(!list) return; list.innerHTML = (state.projects || []).map(p => `<div class="glass-panel rounded-3xl p-5 border border-white/5 relative group"><div class="flex justify-between mb-3"><div class="flex-1"><input type="text" class="dash-input font-bold text-base" style="color: var(--text-color)" value="${p.title}" oninput="updateProjTitle('${String(p.id)}', this.value)"/><p class="text-[9px] uppercase font-bold opacity-40" style="color: var(--text-color)">ROADMAP ATIVO</p></div><button onclick="deleteProject('${String(p.id)}')" class="material-symbols-outlined opacity-30 hover:opacity-100" style="color: var(--text-color)">delete</button></div><div class="space-y-3 mt-4">${(p.actions || []).map((a, idx) => `<div class="p-3 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2"><div class="flex items-center gap-3"><input type="checkbox" ${a.done ? 'checked' : ''} onchange="toggleAction('${String(p.id)}', ${idx})" class="h-4 w-4 text-primary rounded-full"/><input type="text" class="dash-input text-[11px] flex-1 ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${String(p.id)}', ${idx}, this.value)"/>${p.id === 'risk' ? `<button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg">DIVIDIR</button>` : ''}<button onclick="deleteAction('${String(p.id)}', ${idx})" class="material-symbols-outlined text-[16px] opacity-30" style="color: var(--text-color)">delete</button></div>${a.phases && a.phases.length > 0 ? `<div class="ml-7 pl-3 border-l border-primary/20 space-y-2">${a.phases.map((ph, pIdx) => `<div class="flex items-center gap-2"><input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary"/><input type="text" class="dash-input text-[10px] flex-1 text-white ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/></div>`).join('')}<button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary font-bold uppercase transition-all hover:opacity-100">+ FASE</button></div>` : ''}</div>`).join('')}</div><button onclick="addAction('${String(p.id)}')" class="mt-4 text-[9px] text-primary font-bold">+ Add Task</button></div>`).join(''); }
         function addAction(pId) { const project = state.projects.find(p => String(p.id) === String(pId)); if(project) { if(!project.actions) project.actions = []; project.actions.push({text: "", done: false, phases:[]}); saveState(); renderProj(); } }
         function addNewProject() { const newId = 'p' + Date.now(); state.projects.push({ id: newId, title: "Novo Objetivo", created: Date.now(), actions: [] }); saveState(); renderProj(); }
         function deleteProject(id) { if(confirm("Apagar?") && id !== 'risk') { state.projects = state.projects.filter(p => String(p.id) !== String(id)); saveState(); renderProj(); } }
@@ -440,7 +451,7 @@
 
         // DAILY
         function ensureLog(dateStr) { if (!state.dailyLogs[dateStr]) { state.dailyLogs[dateStr] = { p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false, timeline: { "08:00": "Acordar", "10:00": "Foco", "13:00": "Almoço", "15:00": "Revisão", "18:00": "Lazer", "20:00": "Jantar", "22:00": "Planejamento", "23:00": "Descanso" } }; } return state.dailyLogs[dateStr]; }
-        function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 text-primary rounded-full"/><input type="text" class="dash-input text-sm flex-1 ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const sortedTimes = Object.keys(log.timeline).sort(); document.getElementById('daily-flow').innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0:10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] opacity-30 hover:text-red-400" style="color: var(--text-color)">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; }
+        function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 text-primary rounded-full"/><input type="text" class="dash-input text-sm flex-1 text-white ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const sortedTimes = Object.keys(log.timeline).sort(); document.getElementById('daily-flow').innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0:10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1 text-white">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1 text-white" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] opacity-30 hover:text-red-400" style="color: var(--text-color)">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; }
         function updatePriorityText(n, v) { ensureLog(state.currentDateStr)['p'+n] = v; saveState(); }
         function togglePriority(n) { const l = ensureLog(state.currentDateStr); l['p'+n+'_done'] = !l['p'+n+'_done']; saveState(); loadDay(state.currentDateStr); }
         function updateTimelineText(t, v) { ensureLog(state.currentDateStr).timeline[t] = v; saveState(); }
@@ -495,7 +506,7 @@
                     state.events.filter(e => e.date === currentISO).forEach(ev => {
                         const item = document.createElement('div');
                         item.className = `${ev.alert ? 'bg-pink-500/30 border-pink-500/40' : 'bg-primary/20 border-primary/20'} text-[8px] p-1 rounded border flex justify-between items-center`;
-                        item.innerHTML = `<span class="truncate pr-1 flex items-center gap-1" style="color: var(--text-color)">${ev.alert ? '<span class="material-symbols-outlined text-[10px] text-pink-400">notifications_active</span>' : ''}${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-30 hover:opacity-100" style="color: var(--text-color)">delete</button>`;
+                        item.innerHTML = `<span class="truncate pr-1 text-white flex items-center gap-1" style="color: var(--text-color)">${ev.alert ? '<span class="material-symbols-outlined text-[10px] text-pink-400">notifications_active</span>' : ''}${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-30 hover:opacity-100" style="color: var(--text-color)">delete</button>`;
                         cell.querySelector('div:last-child').appendChild(item);
                     });
                 } else { cell.classList.add('opacity-0'); cell.style.pointerEvents = 'none'; }
@@ -512,7 +523,7 @@
         function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderMonthly(); }
 
         // GTD CONTEXTS
-        function initContexts() { ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { const el = document.getElementById('ctx-'+k); if(!el) return; el.innerHTML = (state.contexts[k] || []).map((item, idx) => `<div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full"/><input type="text" class="dash-input text-[11px] flex-1 ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="material-symbols-outlined text-xs opacity-30" style="color: var(--text-color)">close</button></div>`).join(''); }); }
+        function initContexts() { ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { const el = document.getElementById('ctx-'+k); if(!el) return; el.innerHTML = (state.contexts[k] || []).map((item, idx) => `<div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="material-symbols-outlined text-xs opacity-30" style="color: var(--text-color)">close</button></div>`).join(''); }); }
         function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
         function updateContextItem(k, idx, val) { state.contexts[k][idx].text = val; saveState(); }
         function toggleContextCheck(k, idx) { state.contexts[k][idx].done = !state.contexts[k][idx].done; saveState(); initContexts(); }
@@ -531,7 +542,6 @@
         }
 
         function closeModal() { document.getElementById('modal').classList.replace('flex', 'hidden'); }
-        function generateScreenshot() { const area = document.getElementById('main-scroll-area'); html2canvas(area, { scale: 2, backgroundColor: state.theme_mode === 'dark' ? "#191022" : "#f8fafc", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
 
         window.onload = () => { checkSession(); window.addEventListener('resize', () => { if(state) renderProj(); }); };
     </script>
