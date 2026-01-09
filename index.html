@@ -72,6 +72,7 @@
         .view-content { display: none; height: auto; min-height: 100%; }
         .view-content.active { display: block; }
 
+        /* Visibilidade de Inputs e Texto */
         input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea {
             background-color: transparent !important;
             color: #ffffff !important;
@@ -151,7 +152,7 @@
 
 <body class="bg-background-dark font-display text-white antialiased selection:bg-primary selection:text-white overflow-hidden">
     
-    <!-- Sincronização -->
+    <!-- Sincronização Status -->
     <div id="sync-indicator" class="flex items-center gap-2 bg-primary/20 backdrop-blur-xl px-3 py-1.5 rounded-full border border-primary/30">
         <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
         <span class="text-[9px] font-black uppercase tracking-widest">Sincronizando</span>
@@ -164,10 +165,10 @@
             <div class="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] rounded-full bg-pink-500/10 blur-[100px]"></div>
         </div>
         
-        <div class="auth-card glass-panel relative z-10 text-center">
+        <div class="auth-card glass-panel relative z-10 text-center text-white">
             <div class="mb-8">
                 <div class="bg-center bg-no-repeat bg-cover rounded-full h-20 w-20 ring-2 ring-primary/50 shadow-xl mx-auto mb-4" style='background-image: url("https://avatarfiles.alphacoders.com/374/374567.png");'></div>
-                <h2 class="text-2xl font-bold tracking-tight mb-2 text-white">Planner OS</h2>
+                <h2 class="text-2xl font-bold tracking-tight mb-2">Planner OS</h2>
                 <p class="text-white/40 text-sm" id="auth-subtitle">Entre para acessar seu dashboard</p>
             </div>
 
@@ -201,7 +202,7 @@
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
         </div>
 
-        <!-- Sidebar -->
+        <!-- Sidebar HUD -->
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden transition-opacity opacity-0"></div>
         <aside id="sidebar" class="sidebar-transition fixed top-0 left-0 h-full w-[320px] bg-[#1a1122]/95 backdrop-blur-2xl z-[80] transform -translate-x-full border-r border-white/5 p-6 overflow-y-auto hide-scrollbar shadow-2xl">
             <div class="flex justify-between items-center mb-8 text-white">
@@ -234,13 +235,13 @@
             </div>
         </header>
 
-        <!-- Radar -->
+        <!-- Radar Alertas -->
         <div class="relative z-10 flex flex-col gap-2 mb-2 shrink-0">
             <div class="px-6"><h3 class="text-white/90 text-[10px] font-bold tracking-[0.2em] flex items-center gap-2"><span class="material-symbols-outlined text-pink-400 text-[16px]">local_florist</span> ATTENTION RADAR</h3></div>
             <div class="flex overflow-x-auto hide-scrollbar px-6 py-2 gap-4 pb-4" id="radar-container"></div>
         </div>
 
-        <!-- Main Content -->
+        <!-- Main Viewport -->
         <div class="relative z-10 flex-1 glass-panel rounded-t-[2.5rem] mt-2 border-b-0 border-x-0 mx-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
             <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full z-50"></div>
             <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-8 pb-32 relative transition-all duration-500" id="main-scroll-area">
@@ -264,10 +265,10 @@
                 <div id="view-contexts" class="view-content space-y-8 relative z-10">
                     <div class="flex justify-between items-center text-white"><h3 class="text-white text-lg font-bold flex items-center gap-2"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span> Listas de Contexto</h3><button onclick="clearDoneContexts()" class="text-[9px] font-bold text-primary/60 uppercase tracking-widest">Limpar Feitos</button></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-rose-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🔥 Urgente</p><div id="ctx-imp_urg" class="space-y-2"></div><button onclick="addContextItem('imp_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white">+ Novo</button></div>
-                        <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">📅 Importante</p><div id="ctx-imp_not_urg" class="space-y-2"></div><button onclick="addContextItem('imp_not_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white">+ Novo</button></div>
-                        <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🛍️ Compras</p><div id="ctx-compras" class="space-y-2"></div><button onclick="addContextItem('compras')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white">+ Novo</button></div>
-                        <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🏠 Pessoal</p><div id="ctx-casa" class="space-y-2"></div><button onclick="addContextItem('casa')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white">+ Novo</button></div>
+                        <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-rose-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🔥 Urgente</p><div id="ctx-imp_urg" class="space-y-2"></div><button onclick="addContextItem('imp_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white hover:opacity-100 transition-opacity">+ Novo</button></div>
+                        <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">📅 Importante</p><div id="ctx-imp_not_urg" class="space-y-2"></div><button onclick="addContextItem('imp_not_urg')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white hover:opacity-100 transition-opacity">+ Novo</button></div>
+                        <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🛍️ Compras</p><div id="ctx-compras" class="space-y-2"></div><button onclick="addContextItem('compras')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white hover:opacity-100 transition-opacity">+ Novo</button></div>
+                        <div class="glass-panel p-5 rounded-3xl border border-white/5"><p class="text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">🏠 Pessoal</p><div id="ctx-casa" class="space-y-2"></div><button onclick="addContextItem('casa')" class="mt-4 text-[10px] opacity-40 font-bold uppercase text-white hover:opacity-100 transition-opacity">+ Novo</button></div>
                     </div>
                 </div>
 
@@ -280,7 +281,7 @@
                 <!-- VIEW: MONTHLY -->
                 <div id="view-monthly" class="view-content space-y-6 relative z-10">
                     <div class="flex justify-between items-center mb-2"><h3 class="text-white text-lg font-bold flex items-center gap-2 text-white"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span> Agenda Mensal</h3><div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10"><button onclick="changeMonth(-1)" class="material-symbols-outlined text-white hover:text-primary">chevron_left</button><span id="month-title" class="text-sm font-black uppercase tracking-widest text-white min-w-[150px] text-center">---</span><button onclick="changeMonth(1)" class="material-symbols-outlined text-white hover:text-primary">chevron_right</button></div></div>
-                    <div id="month-header" class="grid grid-cols-7 gap-1"><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">DOM</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">SEG</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">TER</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">QUA</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">QUI</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">SEX</div><div class="text-center text-[10px] font-black opacity-30 p-2 text-white">SAB</div></div>
+                    <div id="month-header" class="grid grid-cols-7 gap-1 text-white"><div class="text-center text-[10px] font-black opacity-30 p-2">DOM</div><div class="text-center text-[10px] font-black opacity-30 p-2">SEG</div><div class="text-center text-[10px] font-black opacity-30 p-2">TER</div><div class="text-center text-[10px] font-black opacity-30 p-2">QUA</div><div class="text-center text-[10px] font-black opacity-30 p-2">QUI</div><div class="text-center text-[10px] font-black opacity-30 p-2">SEX</div><div class="text-center text-[10px] font-black opacity-30 p-2">SAB</div></div>
                     <div id="month-grid" class="grid grid-cols-7 gap-1 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"></div>
                 </div>
             </div>
@@ -306,7 +307,7 @@
 
         let isSignUpMode = false;
         let currentUser = null;
-        let state;
+        let state = null;
         let viewDate = new Date();
         let saveTimeout = null;
 
@@ -388,6 +389,7 @@
                 state = data.full_state;
                 state.currentDateStr = getLocalTodayISO();
             } else {
+                // Estado inicial
                 state = {
                     activeView: 'daily',
                     events: [],
@@ -402,6 +404,13 @@
                     contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] }
                 };
             }
+
+            // Sanitização e Reparação do Estado (Garantia para listas de contexto)
+            if(!state.contexts) state.contexts = { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] };
+            ['casa', 'compras', 'adm', 'imp_urg', 'imp_not_urg'].forEach(k => {
+                if(!state.contexts[k]) state.contexts[k] = [];
+            });
+
             lucide.createIcons();
             resizeCanvas();
             renderAll();
@@ -422,7 +431,7 @@
             }, 800);
         }
 
-        // --- UI & LOGIC (STYLUS, NAVEGAÇÃO, DAILY, RADAR, ROADMAP, CONTEXTS, CALENDARIO) ---
+        // --- UI & LOGIC ---
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -475,32 +484,31 @@
         function loadDrawingFromState() { if(!state) return; const data = state.inkData[state.activeView === 'daily' ? `ink_${state.currentDateStr}` : `ink_${state.activeView}`]; ctx.clearRect(0, 0, canvas.width, canvas.height); if(data) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0, canvas.width/2, canvas.height/2); img.src = data; } }
 
         function ensureLog(dateStr) { if (!state.dailyLogs[dateStr]) { state.dailyLogs[dateStr] = { p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false, timeline: { "08:00": "Acordar", "10:00": "Foco Estudo", "13:00": "Almoço", "15:00": "Revisão", "18:00": "Atividade Livre", "20:00": "Jantar", "22:00": "Planeamento", "23:00": "Descanso" } }; } return state.dailyLogs[dateStr]; }
-        function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 border-primary/50 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-sm flex-1 ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const fCont = document.getElementById('daily-flow'); const sortedTimes = Object.keys(log.timeline).sort(); fCont.innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1 text-white" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] text-white/30 hover:text-red-400">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; resizeCanvas(); }
+        function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 border-primary/50 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-sm flex-1 text-white ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const fCont = document.getElementById('daily-flow'); const sortedTimes = Object.keys(log.timeline).sort(); fCont.innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0:10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1 text-white">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1 text-white" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] text-white/30 hover:text-red-400 transition-all">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; resizeCanvas(); }
         function addTimelineSlotPrompt() { const t = prompt("Hora HH:MM"); if(t && /^([01]\d|2[0-3]):([0-5]\d)$/.test(t)) { ensureLog(state.currentDateStr).timeline[t] = ""; saveState(); loadDay(state.currentDateStr); } }
         function deleteTimelineSlot(t) { delete state.dailyLogs[state.currentDateStr].timeline[t]; saveState(); loadDay(state.currentDateStr); }
 
-        function updateRadar() { if(!state) return; const log = ensureLog(state.currentDateStr); const todayISO = getLocalTodayISO(); const sbPrios = document.getElementById('sidebar-priorities-content'); if(sbPrios) { const list = [log.p1, log.p2, log.p3].filter(p => p && p.trim() !== ""); sbPrios.innerHTML = list.length > 0 ? list.map(p => `<div class="alert-card-sidebar text-xs text-white">${p}</div>`).join('') : '<p class="text-white/20 text-[10px]">Vazio.</p>'; } const container = document.getElementById('radar-container'); const upcoming = state.events.map(e => ({ ...e, diff: Math.ceil((new Date(e.date + "T12:00:00") - new Date(todayISO + "T12:00:00")) / 86400000) })).filter(e => e.diff >= 0).sort((a,b) => a.diff - b.diff); container.innerHTML = upcoming.slice(0, 5).map(ev => `<div class="neon-border-wrapper shrink-0"><div class="bg-[#251b2e] h-full rounded-xl p-4 min-w-[180px] flex gap-3 items-center relative group"><button onclick="deleteEvent(${ev.id})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-[8px] text-white/40">DEL</button><div class="z-10"><p class="text-white text-xs font-bold uppercase truncate">${ev.desc}</p><p class="text-pink-300 text-[10px]">${ev.diff === 0 ? 'HOJE' : ev.diff + ' d'}</p></div></div></div>`).join('') || '<p class="text-white/20 text-[10px] px-4 font-bold uppercase">Limpo</p>'; const riskProj = state.projects.find(p => p.id === 'risk'); const sbRisks = document.getElementById('sidebar-risks-content'); if(sbRisks && riskProj) { sbRisks.innerHTML = riskProj.actions.filter(a => !a.done).map(a => `<div class="alert-card-sidebar" style="border-left-color: #ff7eb3"><p class="text-white text-xs">${a.text}</p></div>`).join('') || '<p class="text-white/20 text-[10px]">Tudo OK.</p>'; } }
+        function updateRadar() { if(!state) return; const log = ensureLog(state.currentDateStr); const todayISO = getLocalTodayISO(); const sbPrios = document.getElementById('sidebar-priorities-content'); if(sbPrios) { const list = [log.p1, log.p2, log.p3].filter(p => p && p.trim() !== ""); sbPrios.innerHTML = list.length > 0 ? list.map(p => `<div class="alert-card-sidebar text-xs text-white">${p}</div>`).join('') : '<p class="text-white/20 text-[10px]">Vazio.</p>'; } const container = document.getElementById('radar-container'); const upcoming = state.events.map(e => ({ ...e, diff: Math.ceil((new Date(e.date + "T12:00:00") - new Date(todayISO + "T12:00:00")) / 86400000) })).filter(e => e.diff >= 0).sort((a,b) => a.diff - b.diff); container.innerHTML = upcoming.slice(0, 5).map(ev => `<div class="neon-border-wrapper shrink-0"><div class="bg-[#251b2e] h-full rounded-xl p-4 min-w-[180px] flex gap-3 items-center relative group"><button onclick="deleteEvent(${ev.id})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-[8px] text-white/40">DEL</button><div class="z-10"><p class="text-white text-xs font-bold uppercase truncate">${ev.desc}</p><p class="text-pink-300 text-[10px]">${ev.diff === 0 ? 'HOJE' : ev.diff + ' d'}</p></div></div></div>`).join('') || '<p class="text-white/20 text-[10px] px-4 font-bold uppercase">Limpo</p>'; const riskProj = state.projects.find(p => p.id === 'risk'); const sbRisks = document.getElementById('sidebar-risks-content'); if(sbRisks && riskProj) { sbRisks.innerHTML = riskProj.actions.filter(a => !a.done).map(a => `<div class="alert-card-sidebar" style="border-left-color: #ff7eb3"><p class="text-white text-xs text-white">${a.text}</p></div>`).join('') || '<p class="text-white/20 text-[10px]">Tudo OK.</p>'; } }
 
-        function renderProj() { const list = document.getElementById('projects-list'); list.innerHTML = state.projects.map(p => `<div class="glass-panel rounded-3xl p-5 border border-white/5 relative group"><div class="flex justify-between items-start mb-3"><div class="flex-1"><input type="text" class="dash-input font-bold text-base text-white" value="${p.title}" oninput="updateProjTitle('${p.id}', this.value)"/><p class="text-[9px] uppercase font-bold mt-1 text-white/40">ROADMAP ATIVO</p></div></div><div class="space-y-3 mt-4">${p.actions.map((a, idx) => `<div class="p-3 bg-white/5 rounded-2xl border border-white/5"><div class="flex items-center gap-3"><input type="checkbox" ${a.done ? 'checked' : ''} class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0" onchange="toggleAction('${p.id}', ${idx})"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${p.id}', ${idx}, this.value)"/><button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg border border-primary/30 font-black">DIVIDIR</button><button onclick="deleteAction('${p.id}', ${idx})" class="material-symbols-outlined text-[16px] text-white/20">delete</button></div>${a.phases && a.phases.length > 0 ? `<div class="mt-3 ml-7 pl-3 border-l border-white/10 space-y-2">${a.phases.map((ph, pIdx) => `<div class="flex items-center gap-2"><input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary bg-transparent border-white/10 rounded-sm"/><input type="text" class="dash-input text-[10px] flex-1 text-white ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/></div>`).join('')}<button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary/60 font-bold uppercase">+ FASE</button></div>` : ''}</div>`).join('')}</div><button onclick="addAction('${p.id}')" class="mt-4 text-[9px] text-primary font-bold uppercase">+ Add Task</button></div>`).join(''); }
+        function renderProj() { const list = document.getElementById('projects-list'); list.innerHTML = state.projects.map(p => `<div class="glass-panel rounded-3xl p-5 border border-white/5 relative group"><div class="flex justify-between items-start mb-3"><div class="flex-1"><input type="text" class="dash-input font-bold text-base text-white" value="${p.title}" oninput="updateProjTitle('${p.id}', this.value)"/><p class="text-[9px] uppercase font-bold mt-1 text-white/40">ROADMAP ATIVO</p></div></div><div class="space-y-3 mt-4">${p.actions.map((a, idx) => `<div class="p-3 bg-white/5 rounded-2xl border border-white/5"><div class="flex items-center gap-3"><input type="checkbox" ${a.done ? 'checked' : ''} class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0" onchange="toggleAction('${p.id}', ${idx})"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${p.id}', ${idx}, this.value)"/><button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg border border-primary/30 font-black transition-all hover:bg-primary/40">DIVIDIR</button><button onclick="deleteAction('${p.id}', ${idx})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-red-400">delete</button></div>${a.phases && a.phases.length > 0 ? `<div class="mt-3 ml-7 pl-3 border-l border-white/10 space-y-2">${a.phases.map((ph, pIdx) => `<div class="flex items-center gap-2"><input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary bg-transparent border-white/10 rounded-sm"/><input type="text" class="dash-input text-[10px] flex-1 text-white ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/></div>`).join('')}<button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary/60 font-bold uppercase transition-all hover:opacity-100">+ FASE</button></div>` : ''}</div>`).join('')}</div><button onclick="addAction('${p.id}')" class="mt-4 text-[9px] text-primary font-bold uppercase transition-all hover:opacity-100">+ Add Task</button></div>`).join(''); }
 
-        function renderMonthly() { const grid = document.getElementById('month-grid'); const title = document.getElementById('month-title'); grid.innerHTML = ""; const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; title.innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`; const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay(); const lastDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate(); const todayISO = getLocalTodayISO(); for (let i = 0; i < 42; i++) { const dayNum = i - firstDay + 1; const cell = document.createElement('div'); cell.className = "aspect-square glass-panel p-1 flex flex-col border border-white/5 relative cursor-pointer hover:bg-white/5"; if (dayNum > 0 && dayNum <= lastDate) { const currentISO = `${viewDate.getFullYear()}-${(viewDate.getMonth()+1).toString().padStart(2,'0')}-${dayNum.toString().padStart(2,'0')}`; cell.onclick = () => addEventPrompt(currentISO); cell.innerHTML = `<div class="calendar-day-num text-[10px] mb-1 ${currentISO === todayISO ? 'text-primary' : 'opacity-40'}">${dayNum}</div><div class="flex-1 overflow-y-auto hide-scrollbar space-y-1"></div>`; state.events.filter(e => e.date === currentISO).forEach(ev => { const item = document.createElement('div'); item.className = "bg-primary/20 text-[8px] p-1 rounded border border-primary/20 flex justify-between items-center"; item.innerHTML = `<span class="truncate pr-1 text-white">${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-40">delete</button>`; cell.querySelector('div:last-child').appendChild(item); }); } else { cell.classList.add('opacity-0'); cell.style.pointerEvents = 'none'; } grid.appendChild(cell); } }
+        function renderMonthly() { const grid = document.getElementById('month-grid'); const title = document.getElementById('month-title'); grid.innerHTML = ""; const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; title.innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`; const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay(); const lastDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate(); const todayISO = getLocalTodayISO(); for (let i = 0; i < 42; i++) { const dayNum = i - firstDay + 1; const cell = document.createElement('div'); cell.className = "aspect-square glass-panel p-1 flex flex-col border border-white/5 relative cursor-pointer hover:bg-white/5"; if (dayNum > 0 && dayNum <= lastDate) { const currentISO = `${viewDate.getFullYear()}-${(viewDate.getMonth()+1).toString().padStart(2,'0')}-${dayNum.toString().padStart(2,'0')}`; cell.onclick = () => addEventPrompt(currentISO); cell.innerHTML = `<div class="calendar-day-num text-[10px] mb-1 ${currentISO === todayISO ? 'text-primary' : 'opacity-40'}">${dayNum}</div><div class="flex-1 overflow-y-auto hide-scrollbar space-y-1"></div>`; state.events.filter(e => e.date === currentISO).forEach(ev => { const item = document.createElement('div'); item.className = "bg-primary/20 text-[8px] p-1 rounded border border-primary/20 flex justify-between items-center"; item.innerHTML = `<span class="truncate pr-1 text-white">${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-40 hover:opacity-100">delete</button>`; cell.querySelector('div:last-child').appendChild(item); }); } else { cell.classList.add('opacity-0'); cell.style.pointerEvents = 'none'; } grid.appendChild(cell); } }
         function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderMonthly(); }
 
-        function initContexts() { ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { const el = document.getElementById('ctx-'+k); if(!el) return; el.innerHTML = (state.contexts[k] || []).map((item, idx) => `<div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs hover:text-red-400">×</button></div>`).join(''); }); }
-        function splitTask(idx) { const p = state.projects.find(proj => proj.id === 'risk'); if(!p.actions[idx].phases) p.actions[idx].phases = []; p.actions[idx].phases.push({ text: "Fase 1", done: false }); saveState(); renderProj(); }
-        function addPhaseToTask(idx) { state.projects.find(p => p.id === 'risk').actions[idx].phases.push({text:"", done:false}); saveState(); renderProj(); }
-        function updatePhaseText(idx, pIdx, val) { state.projects.find(p => p.id === 'risk').actions[idx].phases[pIdx].text = val; saveState(); }
-        function togglePhase(idx, pIdx) { const ph = state.projects.find(p => p.id === 'risk').actions[idx].phases[pIdx]; ph.done = !ph.done; saveState(); renderProj(); }
-        function toggleAction(pId, idx) { const p = state.projects.find(p => p.id === pId); p.actions[idx].done = !p.actions[idx].done; saveState(); renderProj(); }
-        function updateActionText(pId, idx, val) { state.projects.find(p => p.id === pId).actions[idx].text = val; saveState(); }
-        function deleteAction(pId, idx) { state.projects.find(p => p.id === pId).actions.splice(idx, 1); saveState(); renderProj(); }
-        function updateProjTitle(id, val) { state.projects.find(p => p.id === id).title = val; saveState(); }
-        function addNewProject() { state.projects.push({ id: 'p'+Date.now(), title: "Novo Objetivo", created: Date.now(), why: "", actions: [{text: "", done: false, phases:[]}] }); saveState(); renderProj(); }
-        function addAction(pId) { state.projects.find(p => p.id === pId).actions.push({text: "", done: false, phases:[]}); saveState(); renderProj(); }
+        function initContexts() { 
+            ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { 
+                const el = document.getElementById('ctx-'+k); 
+                if(!el) return; 
+                el.innerHTML = (state.contexts[k] || []).map((item, idx) => `
+                <div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs hover:text-red-400">×</button></div>`).join(''); 
+            }); 
+        }
         function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
+        function updateContextItem(k, idx, val) { state.contexts[k][idx].text = val; saveState(); }
         function toggleContextCheck(k, idx) { state.contexts[k][idx].done = !state.contexts[k][idx].done; saveState(); initContexts(); }
         function deleteContextItem(k, idx) { state.contexts[k].splice(idx, 1); saveState(); initContexts(); }
         function clearDoneContexts() { Object.keys(state.contexts).forEach(k => state.contexts[k] = state.contexts[k].filter(i => !i.done)); saveState(); initContexts(); }
+        
         function togglePriority(n) { const log = ensureLog(state.currentDateStr); log['p'+n+'_done'] = !log['p'+n+'_done']; saveState(); loadDay(state.currentDateStr); }
         function updatePriorityText(n, val) { const log = ensureLog(state.currentDateStr); log['p'+n] = val; saveState(); }
         function updateTimelineText(time, val) { const log = ensureLog(state.currentDateStr); log.timeline[time] = val; saveState(); }
