@@ -13,6 +13,8 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script id="tailwind-config">
         tailwind.config = {
@@ -22,6 +24,8 @@
                     colors: {
                         "primary": "#8c2bee",
                         "background-dark": "#191022",
+                        "glass": "rgba(255, 255, 255, 0.05)",
+                        "glass-strong": "rgba(255, 255, 255, 0.1)",
                     },
                     fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] },
                     backgroundImage: { 'dot-pattern': 'radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px)' },
@@ -49,7 +53,6 @@
             border-radius: 0.75rem;
         }
 
-        /* Camada de Desenho Digital Otimizada para Scroll */
         #ink-canvas {
             position: absolute;
             top: 0;
@@ -69,7 +72,7 @@
         .view-content { display: none; height: auto; min-height: 100%; }
         .view-content.active { display: block; }
 
-        input[type="text"], input[type="date"], textarea {
+        input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea {
             background-color: transparent !important;
             color: #ffffff !important;
             border: none;
@@ -113,16 +116,71 @@
             opacity: 0;
             pointer-events: none;
         }
-        .content-expanded {
-            padding-bottom: 2rem !important;
+        .content-expanded { padding-bottom: 2rem !important; }
+
+        /* Estilos Auth */
+        #auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: #191022;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 
 <body class="bg-background-dark font-display text-white antialiased selection:bg-primary selection:text-white overflow-hidden">
-    <div class="relative h-screen w-full flex flex-col">
+    
+    <!-- TELA DE LOGIN / CADASTRO -->
+    <div id="auth-overlay">
+        <div class="fixed inset-0 pointer-events-none z-0">
+            <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] rounded-full bg-primary/20 blur-[100px]"></div>
+            <div class="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] rounded-full bg-pink-500/10 blur-[100px]"></div>
+        </div>
         
-        <!-- Background Decorativo -->
+        <div class="auth-card glass-panel relative z-10 text-center">
+            <div class="mb-8">
+                <div class="bg-center bg-no-repeat bg-cover rounded-full h-20 w-20 ring-2 ring-primary/50 shadow-xl mx-auto mb-4" style='background-image: url("https://avatarfiles.alphacoders.com/374/374567.png");'></div>
+                <h2 class="text-2xl font-bold tracking-tight mb-2">Planner OS</h2>
+                <p class="text-white/40 text-sm" id="auth-subtitle">Bem-vinda de volta, Min-ji</p>
+            </div>
+
+            <div class="space-y-4" id="auth-form">
+                <div class="text-left">
+                    <label class="text-[10px] font-black text-primary uppercase ml-4 mb-1 block">Email</label>
+                    <input type="email" id="email" placeholder="nome@exemplo.com" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all"/>
+                </div>
+                <div class="text-left">
+                    <label class="text-[10px] font-black text-primary uppercase ml-4 mb-1 block">Senha</label>
+                    <input type="password" id="password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all"/>
+                </div>
+                
+                <button onclick="handleAuth()" id="main-auth-btn" class="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all mt-4">Entrar</button>
+                
+                <p class="text-xs text-white/40 mt-6">
+                    <span id="auth-switch-text">Não tem uma conta?</span>
+                    <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-primary font-bold ml-1 hover:underline">Cadastrar-se</button>
+                </p>
+            </div>
+            
+            <div id="auth-error" class="mt-4 text-xs text-rose-400 font-bold hidden"></div>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL (Oculto inicialmente) -->
+    <div id="app-container" class="relative h-screen w-full flex flex-col hidden">
+        
+        <!-- Fundo Decorativo -->
         <div class="fixed inset-0 pointer-events-none z-0">
             <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[40%] rounded-full bg-primary/20 blur-[100px]"></div>
             <div class="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] rounded-full bg-pink-500/10 blur-[100px]"></div>
@@ -134,25 +192,22 @@
         <aside id="sidebar" class="sidebar-transition fixed top-0 left-0 h-full w-[320px] bg-[#1a1122]/95 backdrop-blur-2xl z-[80] transform -translate-x-full border-r border-white/5 p-6 overflow-y-auto hide-scrollbar shadow-2xl">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-xl font-bold tracking-tight">Status Global</h2>
-                <button onclick="toggleSidebar()" class="material-symbols-outlined opacity-50">close</button>
+                <div class="flex gap-2">
+                    <button onclick="logout()" class="material-symbols-outlined text-sm opacity-50 hover:text-rose-400">logout</button>
+                    <button onclick="toggleSidebar()" class="material-symbols-outlined opacity-50">close</button>
+                </div>
             </div>
             <div class="space-y-8">
                 <section>
-                    <p class="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">target</span> Prioridades de Hoje
-                    </p>
+                    <p class="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-sm">target</span> Prioridades</p>
                     <div id="sidebar-priorities-content" class="space-y-3"></div>
                 </section>
                 <section>
-                    <p class="text-[10px] font-black text-pink-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">event</span> Radar de Atenção
-                    </p>
+                    <p class="text-[10px] font-black text-pink-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-sm">event</span> Radar</p>
                     <div id="sidebar-radar-content" class="space-y-3"></div>
                 </section>
                 <section>
-                    <p class="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-sm">warning</span> Riscos Procrastinação
-                    </p>
+                    <p class="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-sm">warning</span> Riscos</p>
                     <div id="sidebar-risks-content" class="space-y-3"></div>
                 </section>
             </div>
@@ -172,21 +227,20 @@
                     <p class="text-white text-xl font-bold leading-tight">Min-ji</p>
                 </div>
             </div>
-            
             <div class="flex items-center gap-3">
-                <button onclick="toggleBottomNav()" id="nav-toggle-btn" class="glass-panel p-3 rounded-full flex items-center justify-center transition-all hover:bg-white/10 ring-1 ring-white/5" title="Ocultar Menu">
+                <button onclick="toggleBottomNav()" id="nav-toggle-btn" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5" title="Ocultar Menu">
                     <span class="material-symbols-outlined text-white" id="nav-toggle-icon">visibility</span>
                 </button>
-                <button onclick="togglePenMode()" id="pen-toggle" class="glass-panel p-3 rounded-full flex items-center justify-center transition-all hover:bg-white/10 ring-1 ring-white/5">
+                <button onclick="togglePenMode()" id="pen-toggle" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5">
                     <span class="material-symbols-outlined text-white" id="pen-icon">edit_off</span>
                 </button>
-                <button onclick="generateScreenshot()" class="glass-panel p-3 rounded-full flex items-center justify-center transition-all hover:bg-white/10 ring-1 ring-white/5">
+                <button onclick="generateScreenshot()" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5">
                     <span class="material-symbols-outlined text-white">photo_camera</span>
                 </button>
             </div>
         </header>
 
-        <!-- Radar Feed -->
+        <!-- Radar Horizontal -->
         <div class="relative z-10 flex flex-col gap-2 mb-2 shrink-0">
             <div class="px-6 flex justify-between items-center">
                 <h3 class="text-white/90 text-[10px] font-bold tracking-[0.2em] flex items-center gap-2">
@@ -197,11 +251,9 @@
             <div class="flex overflow-x-auto hide-scrollbar px-6 py-2 gap-4 pb-4" id="radar-container"></div>
         </div>
 
-        <!-- Dashboard Container -->
+        <!-- Content Sheet -->
         <div class="relative z-10 flex-1 glass-panel rounded-t-[2.5rem] mt-2 border-b-0 border-x-0 mx-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
-            
             <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full z-50"></div>
-            
             <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-8 pb-32 relative transition-all duration-500" id="main-scroll-area">
                 
                 <canvas id="ink-canvas"></canvas>
@@ -274,8 +326,8 @@
                         <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 block"></span>
                         Roadmap 2026
                     </h3>
-                    <div id="projects-list" class="space-y-4"></div>
-                    <button onclick="addNewProject()" class="w-full py-4 rounded-2xl border border-dashed border-white/10 text-white/30 text-xs font-bold hover:bg-white/5 transition-all uppercase tracking-widest">+ New Objective</button>
+                    <div id="projects-list" class="space-y-3"></div>
+                    <button onclick="addNewProject()" class="w-full py-4 rounded-2xl border border-dashed border-white/10 text-white/30 text-xs font-bold hover:bg-white/5 uppercase tracking-widest">+ New Objective</button>
                 </div>
 
                 <!-- VIEW: BRAIN DUMP -->
@@ -307,11 +359,10 @@
                     </div>
                     <div id="month-grid" class="grid grid-cols-7 gap-1 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"></div>
                 </div>
-
             </div>
         </div>
 
-        <!-- Navigation -->
+        <!-- Navegação Inferior -->
         <nav id="bottom-nav" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[60] bottom-nav-transition">
             <div class="glass-panel rounded-3xl p-2 flex justify-between items-center shadow-2xl shadow-primary/30 ring-1 ring-white/10">
                 <button onclick="nav('daily')" class="nav-btn flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl transition-all" id="btn-daily">
@@ -339,19 +390,90 @@
         </nav>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-6 backdrop-blur-md">
-        <div class="max-w-2xl w-full bg-[#1a1122] rounded-[2.5rem] p-8 border border-white/10 flex flex-col items-center shadow-2xl text-center">
-            <h3 class="text-white text-xl font-bold mb-2">Export Concluído</h3>
-            <img id="img-preview" class="w-full rounded-2xl border border-white/5 mb-8" src=""/>
-            <div class="flex gap-4 w-full">
-                <a id="dl-link" download="planner.png" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold">Baixar</a>
-                <button onclick="closeModal()" class="px-8 bg-white/5 text-white rounded-2xl font-bold">Fechar</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // --- 1. STATE MANAGEMENT ---
+        // --- INICIALIZAÇÃO SUPABASE ---
+        const SUPABASE_URL = "https://xmbydwfxkbpcjmojtyvk.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_9cmC_iJS5VL6j_W_CetgXw_k-pf5gii";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- AUTH LOGIC ---
+        let isSignUpMode = false;
+
+        async function handleAuth() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('auth-error');
+            errorEl.classList.add('hidden');
+
+            if(!email || !password) {
+                showAuthError("Preencha todos os campos");
+                return;
+            }
+
+            let result;
+            if(isSignUpMode) {
+                result = await supabaseClient.auth.signUp({ email, password });
+            } else {
+                result = await supabaseClient.auth.signInWithPassword({ email, password });
+            }
+
+            if(result.error) {
+                showAuthError(result.error.message);
+            } else {
+                if(isSignUpMode) {
+                    alert("Conta criada! Verifique seu email ou tente entrar.");
+                    toggleAuthMode();
+                } else {
+                    // Logado com sucesso
+                    checkSession();
+                }
+            }
+        }
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            const btn = document.getElementById('main-auth-btn');
+            const subtitle = document.getElementById('auth-subtitle');
+            const switchText = document.getElementById('auth-switch-text');
+            const switchBtn = document.getElementById('auth-switch-btn');
+
+            if(isSignUpMode) {
+                btn.innerText = "Criar Conta";
+                subtitle.innerText = "Crie seu acesso pessoal";
+                switchText.innerText = "Já tem uma conta?";
+                switchBtn.innerText = "Entrar";
+            } else {
+                btn.innerText = "Entrar";
+                subtitle.innerText = "Bem-vinda de volta, Min-ji";
+                switchText.innerText = "Não tem uma conta?";
+                switchBtn.innerText = "Cadastrar-se";
+            }
+        }
+
+        function showAuthError(msg) {
+            const errorEl = document.getElementById('auth-error');
+            errorEl.innerText = msg;
+            errorEl.classList.remove('hidden');
+        }
+
+        async function checkSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if(session) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('app-container').classList.remove('hidden');
+                initApp();
+            } else {
+                document.getElementById('auth-overlay').style.display = 'flex';
+                document.getElementById('app-container').classList.add('hidden');
+            }
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            location.reload();
+        }
+
+        // --- 1. STATE MANAGEMENT (CORE) ---
         const STATE_KEY = 'plannerState_daughter_v2';
         let state;
         let viewDate = new Date();
@@ -362,24 +484,29 @@
             return new Date(now.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
         }
 
-        try {
-            state = JSON.parse(localStorage.getItem(STATE_KEY));
-        } catch (e) { state = null; }
+        function initApp() {
+            try {
+                state = JSON.parse(localStorage.getItem(STATE_KEY));
+            } catch (e) { state = null; }
 
-        if (!state) {
-            state = {
-                activeView: 'daily',
-                events: [],
-                projects: [
-                    { id: 'p1', title: "Evolução Pessoal 2026", created: Date.now(), why: "Propósito", actions: [{text: "Definir metas", done: false, phases: []}] },
-                    { id: 'risk', title: "Risco Procrastinação", created: Date.now(), why: "Ação imediata", actions: [{text: "Tarefa crítica", done: false, phases: []}] }
-                ],
-                currentDateStr: getLocalTodayISO(),
-                dailyLogs: {},
-                inkData: {},
-                dump: "",
-                contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] }
-            };
+            if (!state) {
+                state = {
+                    activeView: 'daily',
+                    events: [],
+                    projects: [
+                        { id: 'p1', title: "Evolução Pessoal 2026", created: Date.now(), why: "Propósito", actions: [{text: "Definir metas", done: false, phases: []}] },
+                        { id: 'risk', title: "Risco Procrastinação", created: Date.now(), why: "Ação imediata", actions: [{text: "Tarefa crítica", done: false, phases: []}] }
+                    ],
+                    currentDateStr: getLocalTodayISO(),
+                    dailyLogs: {},
+                    inkData: {},
+                    dump: "",
+                    contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] }
+                };
+            }
+            lucide.createIcons();
+            resizeCanvas();
+            renderAll();
         }
 
         function saveState() {
@@ -450,6 +577,7 @@
 
         function resizeCanvas() {
             const area = document.getElementById('main-scroll-area');
+            if(!area) return;
             canvas.width = area.clientWidth * 2;
             canvas.height = area.scrollHeight * 2; 
             ctx.scale(2, 2);
@@ -486,11 +614,13 @@
         canvas.addEventListener('pointerup', () => { isDrawing = false; saveDrawingToState(); });
 
         function saveDrawingToState() {
+            if(!state) return;
             const key = state.activeView === 'daily' ? `ink_${state.currentDateStr}` : `ink_${state.activeView}`;
             state.inkData[key] = canvas.toDataURL();
         }
 
         function loadDrawingFromState() {
+            if(!state) return;
             const key = state.activeView === 'daily' ? `ink_${state.currentDateStr}` : `ink_${state.activeView}`;
             const data = state.inkData[key];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -567,10 +697,12 @@
             if(log) { delete log.timeline[time]; saveState(); loadDay(state.currentDateStr); }
         }
 
-        // --- 5. SIDEBAR E CALENDÁRIO ---
+        // --- 5. SIDEBAR E RADAR ---
         function updateRadar() {
+            if(!state) return;
             const log = ensureLog(state.currentDateStr);
             const todayISO = getLocalTodayISO();
+            
             const sbPrios = document.getElementById('sidebar-priorities-content');
             if(sbPrios) {
                 const list = [log.p1, log.p2, log.p3].filter(p => p && p.trim() !== "");
@@ -631,7 +763,6 @@
         }
         function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderMonthly(); }
 
-        // --- 6. ROADMAP ---
         function renderProj() {
             const list = document.getElementById('projects-list');
             list.innerHTML = state.projects.map(p => {
@@ -669,7 +800,7 @@
             }).join('');
         }
 
-        // --- 7. CORE UTILS ---
+        // --- 6. LOGICA CORE ---
         function splitTask(idx) { const p = state.projects.find(proj => proj.id === 'risk'); if(!p.actions[idx].phases) p.actions[idx].phases = []; p.actions[idx].phases.push({ text: "Nova fase", done: false }); saveState(); renderProj(); }
         function addPhaseToTask(idx) { state.projects.find(p => p.id === 'risk').actions[idx].phases.push({text:"", done:false}); saveState(); renderProj(); }
         function updatePhaseText(idx, pIdx, val) { state.projects.find(p => p.id === 'risk').actions[idx].phases[pIdx].text = val; saveState(); }
@@ -698,7 +829,10 @@
         function closeModal() { document.getElementById('modal').classList.replace('flex', 'hidden'); }
         function generateScreenshot() { saveDrawingToState(); html2canvas(document.getElementById('main-scroll-area'), { scale: 2, backgroundColor: "#191022", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
 
-        window.onload = function() { lucide.createIcons(); resizeCanvas(); renderAll(); window.addEventListener('resize', resizeCanvas); };
+        window.onload = function() {
+            checkSession();
+            window.addEventListener('resize', resizeCanvas);
+        };
     </script>
 </body>
 </html>
