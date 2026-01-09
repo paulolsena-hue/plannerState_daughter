@@ -53,22 +53,6 @@
             border-radius: 0.75rem;
         }
 
-        #ink-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 40;
-            pointer-events: none;
-            touch-action: none;
-        }
-
-        body.pen-mode #ink-canvas {
-            pointer-events: auto;
-            cursor: crosshair;
-        }
-
         .view-content { display: none; height: auto; min-height: 100%; }
         .view-content.active { display: block; }
 
@@ -230,7 +214,6 @@
             </div>
             <div class="flex items-center gap-3">
                 <button onclick="toggleBottomNav()" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5"><span class="material-symbols-outlined text-white" id="nav-toggle-icon">visibility</span></button>
-                <button onclick="togglePenMode()" id="pen-toggle" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5"><span class="material-symbols-outlined text-white" id="pen-icon">edit_off</span></button>
                 <button onclick="generateScreenshot()" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5"><span class="material-symbols-outlined text-white">photo_camera</span></button>
             </div>
         </header>
@@ -245,7 +228,6 @@
         <div class="relative z-10 flex-1 glass-panel rounded-t-[2.5rem] mt-2 border-b-0 border-x-0 mx-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
             <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full z-50"></div>
             <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-8 pb-32 relative transition-all duration-500" id="main-scroll-area">
-                <canvas id="ink-canvas"></canvas>
 
                 <!-- VIEW: DAILY -->
                 <div id="view-daily" class="view-content active space-y-10 relative z-10">
@@ -416,7 +398,6 @@
                 state = data.full_state;
                 state.currentDateStr = getLocalTodayISO();
             } else {
-                // Estado inicial
                 state = {
                     activeView: 'daily',
                     events: [],
@@ -426,7 +407,6 @@
                     ],
                     currentDateStr: getLocalTodayISO(),
                     dailyLogs: {},
-                    inkData: {},
                     dump: "",
                     dumpHistory: [],
                     contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] }
@@ -441,13 +421,11 @@
             });
 
             lucide.createIcons();
-            resizeCanvas();
             renderAll();
         }
 
         async function saveState() {
             if(!currentUser || !state) return;
-            saveDrawingToState();
             document.getElementById('sync-indicator').classList.add('active');
             if(saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
@@ -470,16 +448,9 @@
 
         function archiveDump() {
             if(!state.dump || state.dump.trim() === "") return;
-            
             const now = new Date();
             const timestamp = now.toLocaleString('pt-BR');
-            
-            state.dumpHistory.unshift({
-                id: Date.now(),
-                text: state.dump,
-                time: timestamp
-            });
-            
+            state.dumpHistory.unshift({ id: Date.now(), text: state.dump, time: timestamp });
             state.dump = "";
             document.getElementById('brain-dump-text').value = "";
             saveState();
@@ -497,12 +468,11 @@
         function renderDumpHistory() {
             const list = document.getElementById('dump-history-list');
             if(!list) return;
-            
             list.innerHTML = state.dumpHistory.map(h => `
-                <div class="glass-panel p-4 rounded-2xl border border-white/5 relative group animate-in slide-in-from-top duration-300">
+                <div class="glass-panel p-4 rounded-2xl border border-white/5 relative group">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-[9px] font-black text-primary uppercase tracking-widest">${h.time}</span>
-                        <button onclick="deleteHistoryItem(${h.id})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-rose-400 transition-all opacity-0 group-hover:opacity-100">delete</button>
+                        <button onclick="deleteHistoryItem(${h.id})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-rose-400 transition-all">delete</button>
                     </div>
                     <p class="text-xs text-white/70 whitespace-pre-wrap leading-relaxed">${h.text}</p>
                 </div>
@@ -525,7 +495,6 @@
         }
 
         function nav(viewId) {
-            saveDrawingToState();
             document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('bg-primary', 'text-white', 'shadow-lg'); b.classList.add('text-white/40'); });
             document.getElementById('view-' + viewId).classList.add('active');
@@ -536,33 +505,8 @@
             if(window.innerWidth < 1024 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) toggleSidebar();
         }
 
-        const canvas = document.getElementById('ink-canvas');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        let penMode = false;
-
-        function resizeCanvas() {
-            const area = document.getElementById('main-scroll-area'); if(!area) return;
-            canvas.width = area.clientWidth * 2; canvas.height = area.scrollHeight * 2;
-            ctx.scale(2, 2); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; loadDrawingFromState();
-        }
-
-        function togglePenMode() {
-            penMode = !penMode; document.body.classList.toggle('pen-mode', penMode);
-            document.getElementById('pen-icon').innerText = penMode ? "edit" : "edit_off";
-            document.getElementById('pen-toggle').classList.toggle('bg-primary/40', penMode);
-            if(!penMode) saveState();
-        }
-
-        canvas.addEventListener('pointerdown', (e) => { if(!penMode) return; isDrawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top); });
-        canvas.addEventListener('pointermove', (e) => { if(!isDrawing || !penMode) return; const rect = canvas.getBoundingClientRect(); ctx.lineWidth = e.pressure ? e.pressure * 5 : 2; ctx.strokeStyle = "#8c2bee"; ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top); ctx.stroke(); });
-        canvas.addEventListener('pointerup', () => { isDrawing = false; saveState(); });
-
-        function saveDrawingToState() { if(!state) return; state.inkData[state.activeView === 'daily' ? `ink_${state.currentDateStr}` : `ink_${state.activeView}`] = canvas.toDataURL(); }
-        function loadDrawingFromState() { if(!state) return; const data = state.inkData[state.activeView === 'daily' ? `ink_${state.currentDateStr}` : `ink_${state.activeView}`]; ctx.clearRect(0, 0, canvas.width, canvas.height); if(data) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0, canvas.width/2, canvas.height/2); img.src = data; } }
-
         function ensureLog(dateStr) { if (!state.dailyLogs[dateStr]) { state.dailyLogs[dateStr] = { p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false, timeline: { "08:00": "Acordar", "10:00": "Foco Estudo", "13:00": "Almoço", "15:00": "Revisão", "18:00": "Atividade Livre", "20:00": "Jantar", "22:00": "Planeamento", "23:00": "Descanso" } }; } return state.dailyLogs[dateStr]; }
-        function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 border-primary/50 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-sm flex-1 text-white ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const fCont = document.getElementById('daily-flow'); const sortedTimes = Object.keys(log.timeline).sort(); fCont.innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0:10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1 text-white">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1 text-white" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] text-white/30 hover:text-red-400 transition-all">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; resizeCanvas(); }
+        function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 border-primary/50 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-sm flex-1 text-white ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const fCont = document.getElementById('daily-flow'); const sortedTimes = Object.keys(log.timeline).sort(); fCont.innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0:10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1 text-white">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1 text-white" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] text-white/30 hover:text-red-400 transition-all">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; }
         function addTimelineSlotPrompt() { const t = prompt("Hora HH:MM"); if(t && /^([01]\d|2[0-3]):([0-5]\d)$/.test(t)) { ensureLog(state.currentDateStr).timeline[t] = ""; saveState(); loadDay(state.currentDateStr); } }
         function deleteTimelineSlot(t) { delete state.dailyLogs[state.currentDateStr].timeline[t]; saveState(); loadDay(state.currentDateStr); }
 
@@ -592,7 +536,6 @@
                 renderDumpHistory();
             }
             updateRadar();
-            loadDrawingFromState();
         }
 
         function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
@@ -606,13 +549,13 @@
         function updateDumpText(v) { state.dump = v; saveState(); }
         function changeDay(delta) { const d = new Date(state.currentDateStr + "T12:00:00"); d.setDate(d.getDate() + delta); state.currentDateStr = d.toISOString().split('T')[0]; renderAll(); saveState(); }
         function loadDayFromInput() { loadDay(document.getElementById('daily-date').value); }
-        function resetDaily() { if(confirm("Limpar dia?")) { state.dailyLogs[state.currentDateStr] = null; delete state.inkData[`ink_${state.currentDateStr}`]; renderAll(); saveState(); } }
+        function resetDaily() { if(confirm("Limpar dia?")) { state.dailyLogs[state.currentDateStr] = null; saveState(); renderAll(); } }
         function addEventPrompt(date = null) { const d = date || prompt("AAAA-MM-DD"); const t = prompt("Evento:"); if(d && t) { state.events.push({date: d, desc: t, id: Date.now()}); saveState(); renderAll(); } }
         function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderAll(); }
         function closeModal() { document.getElementById('modal').classList.replace('hidden', 'flex'); }
-        function generateScreenshot() { saveDrawingToState(); html2canvas(document.getElementById('main-scroll-area'), { scale: 2, backgroundColor: "#191022", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
+        function generateScreenshot() { const area = document.getElementById('main-scroll-area'); html2canvas(area, { scale: 2, backgroundColor: "#191022", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
 
-        window.onload = () => { checkSession(); window.addEventListener('resize', resizeCanvas); };
+        window.onload = () => { checkSession(); window.addEventListener('resize', () => { if(state) resizeCanvas(); }); };
     </script>
 </body>
 </html>
