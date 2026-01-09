@@ -22,7 +22,7 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#8c2bee",
+                        "primary": "var(--primary-color, #8c2bee)",
                         "background-dark": "#191022",
                         "glass": "rgba(255, 255, 255, 0.05)",
                         "glass-strong": "rgba(255, 255, 255, 0.1)",
@@ -36,7 +36,10 @@
     </script>
 
     <style>
-        :root { color-scheme: dark; }
+        :root { 
+            --primary-color: #8c2bee; 
+            color-scheme: dark; 
+        }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -48,7 +51,7 @@
         }
 
         .neon-border-wrapper {
-            background: linear-gradient(45deg, #ff7eb3, #8c2bee, #00d4ff);
+            background: linear-gradient(45deg, #ff7eb3, var(--primary-color), #00d4ff);
             padding: 1px;
             border-radius: 0.75rem;
         }
@@ -56,14 +59,17 @@
         .view-content { display: none; height: auto; min-height: 100%; }
         .view-content.active { display: block; }
 
-        /* Visibilidade de Inputs e Texto */
+        /* Estilo dos inputs para respeitar a cor do tema */
+        input[type="checkbox"] { color: var(--primary-color) !important; border-color: rgba(255,255,255,0.1); }
+        input[type="checkbox"]:focus { --tw-ring-color: var(--primary-color); }
+
         input[type="text"], input[type="date"], input[type="email"], input[type="password"], textarea {
             background-color: transparent !important;
             color: #ffffff !important;
             border: none;
             outline: none;
         }
-        input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.4) !important; }
+        input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.2) !important; }
 
         .dash-input {
             background: transparent !important;
@@ -75,62 +81,35 @@
             outline: none;
         }
 
-        .sidebar-transition {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .sidebar-transition { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
         .alert-card-sidebar {
             background: rgba(255, 255, 255, 0.05);
-            border-left: 4px solid #8c2bee;
+            border-left: 4px solid var(--primary-color);
             padding: 12px;
             border-radius: 0 12px 12px 0;
             margin-bottom: 10px;
         }
 
-        .calendar-day-num {
-            color: #ffffff !important;
-            font-weight: 800;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
+        .calendar-day-num { color: #ffffff !important; font-weight: 800; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
-        .bottom-nav-transition {
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-        }
-        .nav-hidden {
-            transform: translate(-50%, 150%) !important;
-            opacity: 0;
-            pointer-events: none;
-        }
+        .bottom-nav-transition { transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; }
+        .nav-hidden { transform: translate(-50%, 150%) !important; opacity: 0; pointer-events: none; }
         .content-expanded { padding-bottom: 2rem !important; }
 
         #auth-overlay {
-            position: fixed;
-            inset: 0;
-            background: #191022;
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            position: fixed; inset: 0; background: #191022; z-index: 2000;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
         }
-        .auth-card {
-            width: 100%;
-            max-width: 400px;
-            padding: 40px;
-            border-radius: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
+        .auth-card { width: 100%; max-width: 400px; padding: 40px; border-radius: 32px; }
 
         #sync-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 3000;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
+            position: fixed; top: 20px; right: 20px; z-index: 3000; pointer-events: none; opacity: 0; transition: opacity 0.3s;
         }
         #sync-indicator.active { opacity: 1; }
+
+        .theme-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; transition: transform 0.2s; border: 2px solid rgba(255,255,255,0.2); }
+        .theme-dot:hover { transform: scale(1.2); }
     </style>
 </head>
 
@@ -139,7 +118,7 @@
     <!-- Sincronização Status -->
     <div id="sync-indicator" class="flex items-center gap-2 bg-primary/20 backdrop-blur-xl px-3 py-1.5 rounded-full border border-primary/30">
         <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-        <span class="text-[9px] font-black uppercase tracking-widest">Sincronizando</span>
+        <span class="text-[9px] font-black uppercase tracking-widest text-white">Sincronizando</span>
     </div>
 
     <!-- TELA DE LOGIN / CADASTRO -->
@@ -152,7 +131,7 @@
         <div class="auth-card glass-panel relative z-10 text-center text-white">
             <div class="mb-8">
                 <div class="bg-center bg-no-repeat bg-cover rounded-full h-20 w-20 ring-2 ring-primary/50 shadow-xl mx-auto mb-4" style='background-image: url("https://avatarfiles.alphacoders.com/374/374567.png");'></div>
-                <h2 class="text-2xl font-bold tracking-tight mb-2">Planner OS</h2>
+                <h2 class="text-2xl font-bold tracking-tight mb-2 text-white">Planner OS</h2>
                 <p class="text-white/40 text-sm" id="auth-subtitle">Entre para acessar seu dashboard</p>
             </div>
 
@@ -173,7 +152,6 @@
                     <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-primary font-bold ml-1 hover:underline">Cadastrar-se</button>
                 </p>
             </div>
-            
             <div id="auth-error" class="mt-4 text-xs text-rose-400 font-bold hidden"></div>
         </div>
     </div>
@@ -198,7 +176,7 @@
             </div>
             <div class="space-y-8">
                 <section><p class="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-sm">target</span> Prioridades</p><div id="sidebar-priorities-content" class="space-y-3"></div></section>
-                <section><p class="text-[10px] font-black text-pink-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-sm">event</span> Radar</p><div id="sidebar-radar-content" class="space-y-3"></div></section>
+                <section><p class="text-[10px] font-black text-pink-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-sm">event</span> Radar de Atenção</p><div id="sidebar-radar-content" class="space-y-3"></div></section>
                 <section><p class="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-sm">warning</span> Riscos</p><div id="sidebar-risks-content" class="space-y-3"></div></section>
             </div>
         </aside>
@@ -212,13 +190,19 @@
                 </div>
                 <div><p class="text-white/60 text-xs font-medium tracking-wider uppercase" id="header-day-label">CARREGANDO...</p><p class="text-white text-xl font-bold leading-tight">Min-ji</p></div>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+                <!-- Seletor de Temas -->
+                <div class="glass-panel p-2 rounded-full flex items-center gap-2 mr-2">
+                    <div class="theme-dot bg-[#8c2bee]" onclick="switchTheme('#8c2bee')"></div>
+                    <div class="theme-dot bg-[#3b82f6]" onclick="switchTheme('#3b82f6')"></div>
+                    <div class="theme-dot bg-[#ec4899]" onclick="switchTheme('#ec4899')"></div>
+                    <div class="theme-dot bg-[#10b981]" onclick="switchTheme('#10b981')"></div>
+                </div>
                 <button onclick="toggleBottomNav()" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5"><span class="material-symbols-outlined text-white" id="nav-toggle-icon">visibility</span></button>
-                <button onclick="generateScreenshot()" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5"><span class="material-symbols-outlined text-white">photo_camera</span></button>
             </div>
         </header>
 
-        <!-- Radar Alertas -->
+        <!-- Radar Feed -->
         <div class="relative z-10 flex flex-col gap-2 mb-2 shrink-0">
             <div class="px-6"><h3 class="text-white/90 text-[10px] font-bold tracking-[0.2em] flex items-center gap-2"><span class="material-symbols-outlined text-pink-400 text-[16px]">local_florist</span> ATTENTION RADAR</h3></div>
             <div class="flex overflow-x-auto hide-scrollbar px-6 py-2 gap-4 pb-4" id="radar-container"></div>
@@ -228,7 +212,7 @@
         <div class="relative z-10 flex-1 glass-panel rounded-t-[2.5rem] mt-2 border-b-0 border-x-0 mx-2 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
             <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/10 rounded-full z-50"></div>
             <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-8 pb-32 relative transition-all duration-500" id="main-scroll-area">
-
+                
                 <!-- VIEW: DAILY -->
                 <div id="view-daily" class="view-content active space-y-10 relative z-10">
                     <div class="flex justify-between items-center">
@@ -239,8 +223,8 @@
                         </div>
                         <button onclick="resetDaily()" class="text-[9px] font-bold text-red-400/60 uppercase tracking-widest">🗑️ Reset Day</button>
                     </div>
-                    <section><h3 class="text-white text-base font-bold flex items-center gap-2 mb-4"><span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-primary to-pink-500 block"></span> Prioridades de Hoje</h3><div class="flex flex-col gap-3" id="daily-priorities"></div></section>
-                    <section><div class="flex justify-between items-center mb-4"><h3 class="text-white text-base font-bold flex items-center gap-2 text-white"><span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-blue-500 to-cyan-400 block"></span> Cronograma Dinâmico</h3><button onclick="addTimelineSlotPrompt()" class="bg-primary/20 text-primary text-[9px] px-4 py-1.5 rounded-full font-black border border-primary/30 uppercase tracking-widest">+ Add Task</button></div><div class="relative pl-4 border-l border-white/10 space-y-6" id="daily-flow"></div></section>
+                    <section><h3 class="text-white text-base font-bold flex items-center gap-2 mb-4 text-white"><span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-primary to-pink-500 block"></span> Prioridades de Hoje</h3><div class="flex flex-col gap-3" id="daily-priorities"></div></section>
+                    <section><div class="flex justify-between items-center mb-4"><h3 class="text-white text-base font-bold flex items-center gap-2 text-white"><span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-blue-500 to-cyan-400 block"></span> Cronograma Dinâmico</h3><button onclick="addTimelineSlotPrompt()" class="bg-primary/20 text-primary text-[9px] px-4 py-1.5 rounded-full font-black border border-primary/30 uppercase tracking-widest transition-all hover:bg-primary/40">+ Add Task</button></div><div class="relative pl-4 border-l border-white/10 space-y-6" id="daily-flow"></div></section>
                 </div>
 
                 <!-- VIEW: CONTEXTS -->
@@ -259,38 +243,32 @@
 
                 <!-- VIEW: BRAIN DUMP -->
                 <div id="view-dump" class="view-content relative z-10">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-white text-lg font-bold flex items-center gap-2 text-white">
-                            <span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-green-400 to-emerald-600 block"></span> 
-                            Brain Dump
-                        </h3>
+                    <div class="flex justify-between items-center mb-4 text-white">
+                        <h3 class="text-lg font-bold flex items-center gap-2"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-green-400 to-emerald-600 block"></span> Brain Dump</h3>
                         <div class="flex gap-2">
-                            <button onclick="clearDump()" class="p-2 glass-panel rounded-xl hover:bg-rose-500/20 text-rose-400 transition-all flex items-center gap-1 text-[10px] font-bold uppercase">
-                                <span class="material-symbols-outlined text-[18px]">auto_fix_high</span> Limpar
-                            </button>
-                            <button onclick="archiveDump()" class="p-2 glass-panel rounded-xl hover:bg-primary/20 text-primary transition-all flex items-center gap-1 text-[10px] font-bold uppercase">
-                                <span class="material-symbols-outlined text-[18px]">archive</span> Arquivar
-                            </button>
+                            <button onclick="clearDump()" class="p-2 glass-panel rounded-xl hover:bg-rose-500/20 text-rose-400 transition-all flex items-center gap-1 text-[10px] font-bold uppercase"><span class="material-symbols-outlined text-[18px]">auto_fix_high</span> Limpar</button>
+                            <button onclick="archiveDump()" class="p-2 glass-panel rounded-xl hover:bg-primary/20 text-primary transition-all flex items-center gap-1 text-[10px] font-bold uppercase"><span class="material-symbols-outlined text-[18px]">archive</span> Arquivar</button>
                         </div>
                     </div>
-                    
                     <div class="w-full h-80 bg-white/5 rounded-3xl p-6 border border-white/10 bg-dot-pattern bg-dot-size relative group">
-                        <textarea id="brain-dump-text" class="w-full h-full bg-transparent border-none resize-none focus:ring-0 text-sm text-white/80 leading-relaxed" placeholder="Anote qualquer pensamento aqui..." oninput="updateDumpText(this.value)"></textarea>
+                        <textarea id="brain-dump-text" class="w-full h-full bg-transparent border-none resize-none focus:ring-0 text-sm text-white/80 leading-relaxed" placeholder="Anote pensamentos..." oninput="updateDumpText(this.value)"></textarea>
                     </div>
-
-                    <!-- Histórico de Brain Dump -->
-                    <div class="mt-8 space-y-4">
-                        <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] px-2">Histórico de Registros</p>
-                        <div id="dump-history-list" class="space-y-3">
-                            <!-- Injetado via JS -->
-                        </div>
-                    </div>
+                    <div class="mt-8 space-y-4"><p class="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] px-2">Histórico de Registros</p><div id="dump-history-list" class="space-y-3"></div></div>
                 </div>
 
                 <!-- VIEW: MONTHLY -->
                 <div id="view-monthly" class="view-content space-y-6 relative z-10">
-                    <div class="flex justify-between items-center mb-2"><h3 class="text-white text-lg font-bold flex items-center gap-2 text-white"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span> Agenda Mensal</h3><div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10"><button onclick="changeMonth(-1)" class="material-symbols-outlined text-white hover:text-primary">chevron_left</button><span id="month-title" class="text-sm font-black uppercase tracking-widest text-white min-w-[150px] text-center">---</span><button onclick="changeMonth(1)" class="material-symbols-outlined text-white hover:text-primary">chevron_right</button></div></div>
-                    <div id="month-header" class="grid grid-cols-7 gap-1 text-white"><div class="text-center text-[10px] font-black opacity-30 p-2">DOM</div><div class="text-center text-[10px] font-black opacity-30 p-2">SEG</div><div class="text-center text-[10px] font-black opacity-30 p-2">TER</div><div class="text-center text-[10px] font-black opacity-30 p-2">QUA</div><div class="text-center text-[10px] font-black opacity-30 p-2">QUI</div><div class="text-center text-[10px] font-black opacity-30 p-2">SEX</div><div class="text-center text-[10px] font-black opacity-30 p-2">SAB</div></div>
+                    <div class="flex justify-between items-center mb-2 text-white">
+                        <h3 class="text-lg font-bold flex items-center gap-2"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-pink-500 to-rose-600 block"></span> Agenda Mensal</h3>
+                        <div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                            <button onclick="changeMonth(-1)" class="material-symbols-outlined text-white hover:text-primary">chevron_left</button>
+                            <span id="month-title" class="text-sm font-black uppercase tracking-widest text-white min-w-[150px] text-center">---</span>
+                            <button onclick="changeMonth(1)" class="material-symbols-outlined text-white hover:text-primary">chevron_right</button>
+                        </div>
+                    </div>
+                    <div id="month-header" class="grid grid-cols-7 gap-1 text-white">
+                        <div class="text-center text-[10px] font-black opacity-30 p-2 uppercase">Dom</div><div class="text-center text-[10px] font-black opacity-30 p-2 uppercase">Seg</div><div class="text-center text-[10px] font-black opacity-30 p-2 uppercase">Ter</div><div class="text-center text-[10px] font-black opacity-30 p-2 uppercase">Qua</div><div class="text-center text-[10px] font-black opacity-30 p-2 uppercase">Qui</div><div class="text-center text-[10px] font-black opacity-30 p-2 uppercase">Sex</div><div class="text-center text-[10px] font-black opacity-30 p-2 uppercase">Sab</div>
+                    </div>
                     <div id="month-grid" class="grid grid-cols-7 gap-1 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"></div>
                 </div>
             </div>
@@ -309,253 +287,207 @@
     </div>
 
     <script>
-        // --- CREDENCIAIS ---
         const SUPABASE_URL = "https://xmbydwfxkbpcjmojtyvk.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_9cmC_iJS5VL6j_W_CetgXw_k-pf5gii";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let isSignUpMode = false;
         let currentUser = null;
+        let isSignUpMode = false;
         let state = null;
         let viewDate = new Date();
         let saveTimeout = null;
 
-        // --- AUTH ---
+        // THEME
+        function applyTheme(color) {
+            document.documentElement.style.setProperty('--primary-color', color);
+            if(state) state.theme = color;
+        }
+        function switchTheme(color) {
+            applyTheme(color);
+            saveState();
+        }
+
+        // AUTH
         async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorEl = document.getElementById('auth-error');
             errorEl.classList.add('hidden');
-
             if(!email || !password) { showAuthError("Preencha todos os campos"); return; }
-
             let result;
-            if(isSignUpMode) {
-                result = await supabaseClient.auth.signUp({ email, password });
-            } else {
-                result = await supabaseClient.auth.signInWithPassword({ email, password });
-            }
-
-            if(result.error) {
-                showAuthError(result.error.message);
-            } else {
-                if(isSignUpMode && !result.data.session) {
-                    alert("Verifique seu e-mail para confirmar o cadastro!");
-                    toggleAuthMode();
-                } else {
-                    checkSession();
-                }
-            }
+            if(isSignUpMode) result = await supabaseClient.auth.signUp({ email, password });
+            else result = await supabaseClient.auth.signInWithPassword({ email, password });
+            if(result.error) showAuthError(result.error.message);
+            else if(isSignUpMode && !result.data.session) { alert("Verifique seu e-mail!"); toggleAuthMode(); }
+            else checkSession();
         }
-
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
             document.getElementById('main-auth-btn').innerText = isSignUpMode ? "Criar Conta" : "Entrar";
-            document.getElementById('auth-subtitle').innerText = isSignUpMode ? "Crie seu acesso pessoal" : "Bem-vinda de volta, Min-ji";
-            document.getElementById('auth-switch-text').innerText = isSignUpMode ? "Já tem uma conta?" : "Não tem uma conta?";
-            document.getElementById('auth-switch-btn').innerText = isSignUpMode ? "Entrar" : "Cadastrar-se";
+            document.getElementById('auth-subtitle').innerText = isSignUpMode ? "Crie seu acesso pessoal" : "Dashboard da Min-ji";
         }
-
-        function showAuthError(msg) {
-            const errorEl = document.getElementById('auth-error');
-            errorEl.innerText = msg;
-            errorEl.classList.remove('hidden');
-        }
-
+        function showAuthError(msg) { const errorEl = document.getElementById('auth-error'); errorEl.innerText = msg; errorEl.classList.remove('hidden'); }
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if(session) {
-                currentUser = session.user;
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('app-container').classList.remove('hidden');
-                await initApp();
-            } else {
-                document.getElementById('auth-overlay').style.display = 'flex';
-                document.getElementById('app-container').classList.add('hidden');
-            }
+            if(session) { currentUser = session.user; document.getElementById('auth-overlay').style.display = 'none'; document.getElementById('app-container').classList.remove('hidden'); await initApp(); }
+            else { document.getElementById('auth-overlay').style.display = 'flex'; document.getElementById('app-container').classList.add('hidden'); }
         }
-
         async function logout() { await supabaseClient.auth.signOut(); location.reload(); }
 
-        // --- CORE STATE ---
-        function getLocalTodayISO() {
-            const now = new Date();
-            const offset = now.getTimezoneOffset();
-            return new Date(now.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
-        }
-
+        // CORE STATE
+        function getLocalTodayISO() { const now = new Date(); const offset = now.getTimezoneOffset(); return new Date(now.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0]; }
         async function initApp() {
             if(!currentUser) return;
             document.getElementById('header-day-label').innerText = "SINCRONIZANDO...";
-
-            const { data, error } = await supabaseClient
-                .from('user_settings')
-                .select('full_state')
-                .eq('user_id', currentUser.id)
-                .single();
-
-            if (data && data.full_state) {
-                state = data.full_state;
+            const { data, error } = await supabaseClient.from('user_settings').select('full_state').eq('user_id', currentUser.id).single();
+            if (data && data.full_state) { 
+                state = data.full_state; 
                 state.currentDateStr = getLocalTodayISO();
-            } else {
-                state = {
-                    activeView: 'daily',
-                    events: [],
-                    projects: [
-                        { id: 'p1', title: "Evolução Pessoal 2026", created: Date.now(), why: "Propósito", actions: [{text: "Definir metas", done: false, phases: []}] },
-                        { id: 'risk', title: "Risco Procrastinação", created: Date.now(), why: "Ação imediata", actions: [{text: "Tarefa crítica", done: false, phases: []}] }
-                    ],
-                    currentDateStr: getLocalTodayISO(),
-                    dailyLogs: {},
-                    dump: "",
-                    dumpHistory: [],
-                    contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] }
-                };
+                if(state.theme) applyTheme(state.theme);
             }
-
-            // Sanitização
+            else {
+                state = { theme: '#8c2bee', activeView: 'daily', events: [], projects: [{ id: 'risk', title: "Risco Procrastinação", created: Date.now(), actions: [] }], currentDateStr: getLocalTodayISO(), dailyLogs: {}, dump: "", dumpHistory: [], contexts: { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] } };
+            }
             if(!state.dumpHistory) state.dumpHistory = [];
+            if(!state.projects) state.projects = [];
             if(!state.contexts) state.contexts = { casa:[], compras:[], adm:[], imp_urg:[], imp_not_urg:[] };
-            ['casa', 'compras', 'adm', 'imp_urg', 'imp_not_urg'].forEach(k => {
-                if(!state.contexts[k]) state.contexts[k] = [];
-            });
-
             lucide.createIcons();
             renderAll();
         }
-
         async function saveState() {
             if(!currentUser || !state) return;
             document.getElementById('sync-indicator').classList.add('active');
             if(saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
-                const { error } = await supabaseClient
-                    .from('user_settings')
-                    .upsert({ user_id: currentUser.id, full_state: state, updated_at: new Date() });
+                await supabaseClient.from('user_settings').upsert({ user_id: currentUser.id, full_state: state, updated_at: new Date() });
                 document.getElementById('sync-indicator').classList.remove('active');
                 updateRadar();
             }, 800);
         }
 
-        // --- BRAIN DUMP LOGIC ---
-        function clearDump() {
-            if(confirm("Limpar anotação atual? (Isso não apaga o histórico)")) {
-                state.dump = "";
-                document.getElementById('brain-dump-text').value = "";
-                saveState();
-            }
-        }
+        // NAVIGATION
+        function toggleSidebar() { const sb = document.getElementById('sidebar'); const ov = document.getElementById('sidebar-overlay'); if (sb.classList.contains('-translate-x-full')) { sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); setTimeout(() => ov.classList.add('opacity-100'), 10); updateRadar(); } else { sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); ov.classList.remove('opacity-100'); } }
+        function toggleBottomNav() { const isHidden = document.getElementById('bottom-nav').classList.toggle('nav-hidden'); document.getElementById('main-scroll-area').classList.toggle('content-expanded', isHidden); document.getElementById('nav-toggle-icon').innerText = isHidden ? "visibility_off" : "visibility"; }
+        function nav(viewId) { document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('bg-primary', 'text-white', 'shadow-lg'); b.classList.add('text-white/40'); }); document.getElementById('view-' + viewId).classList.add('active'); const btn = document.getElementById('btn-' + viewId); if(btn) { btn.classList.remove('text-white/40'); btn.classList.add('bg-primary', 'text-white', 'shadow-lg'); } state.activeView = viewId; renderAll(); if(window.innerWidth < 1024) toggleSidebar(); }
 
-        function archiveDump() {
-            if(!state.dump || state.dump.trim() === "") return;
-            const now = new Date();
-            const timestamp = now.toLocaleString('pt-BR');
-            state.dumpHistory.unshift({ id: Date.now(), text: state.dump, time: timestamp });
-            state.dump = "";
-            document.getElementById('brain-dump-text').value = "";
-            saveState();
-            renderDumpHistory();
-        }
+        // BRAIN DUMP
+        function updateDumpText(v) { state.dump = v; saveState(); }
+        function clearDump() { if(confirm("Limpar?")) { state.dump = ""; document.getElementById('brain-dump-text').value = ""; saveState(); } }
+        function archiveDump() { if(!state.dump) return; state.dumpHistory.unshift({ id: Date.now(), text: state.dump, time: new Date().toLocaleString('pt-BR') }); state.dump = ""; document.getElementById('brain-dump-text').value = ""; saveState(); renderDumpHistory(); }
+        function deleteHistoryItem(id) { state.dumpHistory = state.dumpHistory.filter(h => h.id !== id); saveState(); renderDumpHistory(); }
+        function renderDumpHistory() { const list = document.getElementById('dump-history-list'); if(!list) return; list.innerHTML = state.dumpHistory.map(h => `<div class="glass-panel p-4 rounded-2xl border border-white/5 group relative"><div class="flex justify-between items-start mb-2"><span class="text-[9px] font-black text-primary uppercase tracking-widest">${h.time}</span><button onclick="deleteHistoryItem(${h.id})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-rose-400">delete</button></div><p class="text-xs text-white/70 whitespace-pre-wrap">${h.text}</p></div>`).join('') || '<p class="text-white/20 text-[10px] text-center">Vazio.</p>'; }
 
-        function deleteHistoryItem(id) {
-            if(confirm("Excluir este registro do histórico permanentemente?")) {
-                state.dumpHistory = state.dumpHistory.filter(h => h.id !== id);
-                saveState();
-                renderDumpHistory();
-            }
-        }
+        // ROADMAP
+        function renderProj() { const list = document.getElementById('projects-list'); if(!list) return; list.innerHTML = (state.projects || []).map(p => `<div class="glass-panel rounded-3xl p-5 border border-white/5 relative group"><div class="flex justify-between mb-3"><div><input type="text" class="dash-input font-bold text-base text-white" value="${p.title}" oninput="updateProjTitle('${String(p.id)}', this.value)"/><p class="text-[9px] uppercase font-bold text-white/40"> ROADMAP ATIVO </p></div><button onclick="deleteProject('${String(p.id)}')" class="material-symbols-outlined text-white/20">delete</button></div><div class="space-y-3 mt-4">${(p.actions || []).map((a, idx) => `<div class="p-3 bg-white/5 rounded-2xl border border-white/5 flex flex-col gap-2"><div class="flex items-center gap-3"><input type="checkbox" ${a.done ? 'checked' : ''} onchange="toggleAction('${String(p.id)}', ${idx})" class="h-4 w-4 text-primary rounded-full"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${String(p.id)}', ${idx}, this.value)"/>${p.id === 'risk' ? `<button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg">DIVIDIR</button>` : ''}<button onclick="deleteAction('${String(p.id)}', ${idx})" class="material-symbols-outlined text-[16px] text-white/20">delete</button></div>${a.phases && a.phases.length > 0 ? `<div class="ml-7 pl-3 border-l border-white/10 space-y-2">${a.phases.map((ph, pIdx) => `<div class="flex items-center gap-2"><input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary"/><input type="text" class="dash-input text-[10px] flex-1 text-white ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/></div>`).join('')}<button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary/60 font-bold uppercase transition-all hover:opacity-100">+ FASE</button></div>` : ''}</div>`).join('')}</div><button onclick="addAction('${String(p.id)}')" class="mt-4 text-[9px] text-primary font-bold">+ Add Task</button></div>`).join(''); }
+        function addAction(pId) { const project = state.projects.find(p => String(p.id) === String(pId)); if(project) { if(!project.actions) project.actions = []; project.actions.push({text: "", done: false, phases:[]}); saveState(); renderProj(); } }
+        function addNewProject() { const newId = 'p' + Date.now(); state.projects.push({ id: newId, title: "Novo Objetivo", created: Date.now(), actions: [] }); saveState(); renderProj(); }
+        function deleteProject(id) { if(confirm("Apagar?") && id !== 'risk') { state.projects = state.projects.filter(p => String(p.id) !== String(id)); saveState(); renderProj(); } }
+        function updateProjTitle(id, val) { const p = state.projects.find(p => String(p.id) === String(id)); if(p) { p.title = val; saveState(); } }
+        function toggleAction(pId, idx) { const p = state.projects.find(p => String(p.id) === String(pId)); if(p) { p.actions[idx].done = !p.actions[idx].done; saveState(); renderProj(); } }
+        function updateActionText(pId, idx, val) { const p = state.projects.find(p => String(p.id) === String(pId)); if(p) { p.actions[idx].text = val; saveState(); } }
+        function deleteAction(pId, idx) { const p = state.projects.find(p => String(p.id) === String(pId)); if(p) { p.actions.splice(idx, 1); saveState(); renderProj(); } }
+        function splitTask(idx) { const p = state.projects.find(proj => proj.id === 'risk'); if(p) { if(!p.actions[idx].phases) p.actions[idx].phases = []; p.actions[idx].phases.push({ text: "Fase 1", done: false }); saveState(); renderProj(); } }
+        function addPhaseToTask(idx) { const p = state.projects.find(p => p.id === 'risk'); if(p) { p.actions[idx].phases.push({text:"", done:false}); saveState(); renderProj(); } }
+        function updatePhaseText(idx, pIdx, val) { const p = state.projects.find(p => p.id === 'risk'); if(p) p.actions[idx].phases[pIdx].text = val; saveState(); }
+        function togglePhase(idx, pIdx) { const p = state.projects.find(p => p.id === 'risk'); if(p) { const ph = p.actions[idx].phases[pIdx]; ph.done = !ph.done; saveState(); renderProj(); } }
 
-        function renderDumpHistory() {
-            const list = document.getElementById('dump-history-list');
-            if(!list) return;
-            list.innerHTML = state.dumpHistory.map(h => `
-                <div class="glass-panel p-4 rounded-2xl border border-white/5 relative group">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-[9px] font-black text-primary uppercase tracking-widest">${h.time}</span>
-                        <button onclick="deleteHistoryItem(${h.id})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-rose-400 transition-all">delete</button>
-                    </div>
-                    <p class="text-xs text-white/70 whitespace-pre-wrap leading-relaxed">${h.text}</p>
-                </div>
-            `).join('') || '<p class="text-white/20 text-[10px] text-center py-4">Nenhum registro arquivado.</p>';
-        }
-
-        // --- UI & CORE LOGIC ---
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            const isOpen = !sidebar.classList.contains('-translate-x-full');
-            if (isOpen) { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); }
-            else { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); updateRadar(); }
-        }
-
-        function toggleBottomNav() {
-            const isHidden = document.getElementById('bottom-nav').classList.toggle('nav-hidden');
-            document.getElementById('main-scroll-area').classList.toggle('content-expanded', isHidden);
-            document.getElementById('nav-toggle-icon').innerText = isHidden ? "visibility_off" : "visibility";
-        }
-
-        function nav(viewId) {
-            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('bg-primary', 'text-white', 'shadow-lg'); b.classList.add('text-white/40'); });
-            document.getElementById('view-' + viewId).classList.add('active');
-            const btn = document.getElementById('btn-' + viewId);
-            if(btn) { btn.classList.remove('text-white/40'); btn.classList.add('bg-primary', 'text-white', 'shadow-lg'); }
-            state.activeView = viewId;
-            renderAll();
-            if(window.innerWidth < 1024 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) toggleSidebar();
-        }
-
-        function ensureLog(dateStr) { if (!state.dailyLogs[dateStr]) { state.dailyLogs[dateStr] = { p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false, timeline: { "08:00": "Acordar", "10:00": "Foco Estudo", "13:00": "Almoço", "15:00": "Revisão", "18:00": "Atividade Livre", "20:00": "Jantar", "22:00": "Planeamento", "23:00": "Descanso" } }; } return state.dailyLogs[dateStr]; }
-        function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 border-primary/50 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-sm flex-1 text-white ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const fCont = document.getElementById('daily-flow'); const sortedTimes = Object.keys(log.timeline).sort(); fCont.innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0:10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1 text-white">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1 text-white" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] text-white/30 hover:text-red-400 transition-all">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; }
-        function addTimelineSlotPrompt() { const t = prompt("Hora HH:MM"); if(t && /^([01]\d|2[0-3]):([0-5]\d)$/.test(t)) { ensureLog(state.currentDateStr).timeline[t] = ""; saveState(); loadDay(state.currentDateStr); } }
+        // DAILY
+        function ensureLog(dateStr) { if (!state.dailyLogs[dateStr]) { state.dailyLogs[dateStr] = { p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false, timeline: { "08:00": "Acordar", "10:00": "Foco", "13:00": "Almoço", "15:00": "Revisão", "18:00": "Lazer", "20:00": "Jantar", "22:00": "Planejamento", "23:00": "Descanso" } }; } return state.dailyLogs[dateStr]; }
+        function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 text-primary rounded-full"/><input type="text" class="dash-input text-sm flex-1 text-white ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const sortedTimes = Object.keys(log.timeline).sort(); document.getElementById('daily-flow').innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0:10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1 text-white">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1 text-white" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] text-white/30 hover:text-red-400 transition-all">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; }
+        function updatePriorityText(n, v) { ensureLog(state.currentDateStr)['p'+n] = v; saveState(); }
+        function togglePriority(n) { const l = ensureLog(state.currentDateStr); l['p'+n+'_done'] = !l['p'+n+'_done']; saveState(); loadDay(state.currentDateStr); }
+        function updateTimelineText(t, v) { ensureLog(state.currentDateStr).timeline[t] = v; saveState(); }
+        function addTimelineSlotPrompt() { const t = prompt("HH:MM"); if(t && /^([01]\d|2[0-3]):([0-5]\d)$/.test(t)) { ensureLog(state.currentDateStr).timeline[t] = ""; saveState(); loadDay(state.currentDateStr); } }
         function deleteTimelineSlot(t) { delete state.dailyLogs[state.currentDateStr].timeline[t]; saveState(); loadDay(state.currentDateStr); }
+        function loadDayFromInput() { loadDay(document.getElementById('daily-date').value); }
+        function resetDaily() { if(confirm("Limpar dia?")) { state.dailyLogs[state.currentDateStr] = null; saveState(); renderAll(); } }
 
-        function updateRadar() { if(!state) return; const log = ensureLog(state.currentDateStr); const todayISO = getLocalTodayISO(); const sbPrios = document.getElementById('sidebar-priorities-content'); if(sbPrios) { const list = [log.p1, log.p2, log.p3].filter(p => p && p.trim() !== ""); sbPrios.innerHTML = list.length > 0 ? list.map(p => `<div class="alert-card-sidebar text-xs text-white">${p}</div>`).join('') : '<p class="text-white/20 text-[10px]">Vazio.</p>'; } const container = document.getElementById('radar-container'); const upcoming = state.events.map(e => ({ ...e, diff: Math.ceil((new Date(e.date + "T12:00:00") - new Date(todayISO + "T12:00:00")) / 86400000) })).filter(e => e.diff >= 0).sort((a,b) => a.diff - b.diff); container.innerHTML = upcoming.slice(0, 5).map(ev => `<div class="neon-border-wrapper shrink-0"><div class="bg-[#251b2e] h-full rounded-xl p-4 min-w-[180px] flex gap-3 items-center relative group"><button onclick="deleteEvent(${ev.id})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-[8px] text-white/40">DEL</button><div class="z-10"><p class="text-white text-xs font-bold uppercase truncate">${ev.desc}</p><p class="text-pink-300 text-[10px]">${ev.diff === 0 ? 'HOJE' : ev.diff + ' d'}</p></div></div></div>`).join('') || '<p class="text-white/20 text-[10px] px-4 font-bold uppercase">Limpo</p>'; const riskProj = state.projects.find(p => p.id === 'risk'); const sbRisks = document.getElementById('sidebar-risks-content'); if(sbRisks && riskProj) { sbRisks.innerHTML = riskProj.actions.filter(a => !a.done).map(a => `<div class="alert-card-sidebar" style="border-left-color: #ff7eb3"><p class="text-white text-xs text-white">${a.text}</p></div>`).join('') || '<p class="text-white/20 text-[10px]">Tudo OK.</p>'; } }
+        // RADAR & SIDEBAR
+        function updateRadar() {
+            if(!state) return;
+            const log = ensureLog(state.currentDateStr);
+            const todayISO = getLocalTodayISO();
+            const sbPrios = document.getElementById('sidebar-priorities-content');
+            const list = [log.p1, log.p2, log.p3].filter(p => p && p.trim() !== "");
+            sbPrios.innerHTML = list.length > 0 ? list.map(p => `<div class="alert-card-sidebar text-xs text-white">${p}</div>`).join('') : '<p class="text-white/20 text-[10px]">Vazio.</p>';
 
-        function renderProj() { const list = document.getElementById('projects-list'); list.innerHTML = state.projects.map(p => `<div class="glass-panel rounded-3xl p-5 border border-white/5 relative group"><div class="flex justify-between items-start mb-3"><div class="flex-1"><input type="text" class="dash-input font-bold text-base text-white" value="${p.title}" oninput="updateProjTitle('${p.id}', this.value)"/><p class="text-[9px] uppercase font-bold mt-1 text-white/40">ROADMAP ATIVO</p></div></div><div class="space-y-3 mt-4">${p.actions.map((a, idx) => `<div class="p-3 bg-white/5 rounded-2xl border border-white/5"><div class="flex items-center gap-3"><input type="checkbox" ${a.done ? 'checked' : ''} class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0" onchange="toggleAction('${p.id}', ${idx})"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${a.done ? 'line-through opacity-30' : ''}" value="${a.text}" oninput="updateActionText('${p.id}', ${idx}, this.value)"/><button onclick="splitTask('${idx}')" class="text-[9px] bg-primary/20 text-primary px-2 py-1 rounded-lg border border-primary/30 font-black transition-all hover:bg-primary/40">DIVIDIR</button><button onclick="deleteAction('${p.id}', ${idx})" class="material-symbols-outlined text-[16px] text-white/20 hover:text-red-400">delete</button></div>${a.phases && a.phases.length > 0 ? `<div class="mt-3 ml-7 pl-3 border-l border-white/10 space-y-2">${a.phases.map((ph, pIdx) => `<div class="flex items-center gap-2"><input type="checkbox" ${ph.done ? 'checked' : ''} onchange="togglePhase('${idx}', ${pIdx})" class="h-3 w-3 text-primary bg-transparent border-white/10 rounded-sm"/><input type="text" class="dash-input text-[10px] flex-1 text-white ${ph.done ? 'line-through opacity-30' : ''}" value="${ph.text}" oninput="updatePhaseText('${idx}', ${pIdx}, this.value)"/></div>`).join('')}<button onclick="addPhaseToTask('${idx}')" class="text-[8px] text-primary/60 font-bold uppercase transition-all hover:opacity-100">+ FASE</button></div>` : ''}</div>`).join('')}</div><button onclick="addAction('${p.id}')" class="mt-4 text-[9px] text-primary font-bold uppercase transition-all hover:opacity-100">+ Add Task</button></div>`).join(''); }
+            const today = new Date(todayISO + "T12:00:00");
+            const alertsOnly = state.events.filter(e => e.alert).map(e => ({ ...e, diff: Math.ceil((new Date(e.date + "T12:00:00") - today) / 86400000) })).filter(e => e.diff >= 0).sort((a,b) => a.diff - b.diff);
+            
+            const container = document.getElementById('radar-container');
+            container.innerHTML = alertsOnly.slice(0, 5).map(ev => `<div class="neon-border-wrapper shrink-0"><div class="bg-[#251b2e] h-full rounded-xl p-4 min-w-[180px] flex gap-3 items-center relative group"><button onclick="deleteEvent(${ev.id})" class="absolute top-2 right-2 text-[8px] text-white/40">DEL</button><div class="z-10"><p class="text-white text-xs font-bold uppercase truncate">${ev.desc}</p><p class="text-pink-300 text-[10px]">${ev.diff === 0 ? 'HOJE' : ev.diff + ' d'}</p></div></div></div>`).join('') || '<p class="text-white/20 text-[10px] px-4">SEM ALERTAS</p>';
+            
+            const sbRadar = document.getElementById('sidebar-radar-content');
+            sbRadar.innerHTML = alertsOnly.map(ev => `<div class="alert-card-sidebar"><p class="text-white text-xs font-bold">${ev.desc}</p><p class="text-primary text-[9px] mt-1 font-black">${ev.diff === 0 ? 'HOJE' : 'em ' + ev.diff + ' dias'}</p></div>`).join('') || '<p class="text-white/20 text-[10px]">Silêncio...</p>';
 
-        function renderMonthly() { const grid = document.getElementById('month-grid'); const title = document.getElementById('month-title'); if(!grid || !title) return; grid.innerHTML = ""; const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; title.innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`; const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay(); const lastDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate(); const todayISO = getLocalTodayISO(); for (let i = 0; i < 42; i++) { const dayNum = i - firstDay + 1; const cell = document.createElement('div'); cell.className = "aspect-square glass-panel p-1 flex flex-col border border-white/5 relative cursor-pointer hover:bg-white/5"; if (dayNum > 0 && dayNum <= lastDate) { const currentISO = `${viewDate.getFullYear()}-${(viewDate.getMonth()+1).toString().padStart(2,'0')}-${dayNum.toString().padStart(2,'0')}`; cell.onclick = () => addEventPrompt(currentISO); cell.innerHTML = `<div class="calendar-day-num text-[10px] mb-1 ${currentISO === todayISO ? 'text-primary' : 'opacity-40'}">${dayNum}</div><div class="flex-1 overflow-y-auto hide-scrollbar space-y-1"></div>`; state.events.filter(e => e.date === currentISO).forEach(ev => { const item = document.createElement('div'); item.className = "bg-primary/20 text-[8px] p-1 rounded border border-primary/20 flex justify-between items-center"; item.innerHTML = `<span class="truncate pr-1 text-white">${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-40">delete</button>`; cell.querySelector('div:last-child').appendChild(item); }); } else { cell.classList.add('opacity-0'); cell.style.pointerEvents = 'none'; } grid.appendChild(cell); } }
-        function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderMonthly(); }
-
-        function initContexts() { 
-            ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { 
-                const el = document.getElementById('ctx-'+k); 
-                if(!el) return; 
-                el.innerHTML = (state.contexts[k] || []).map((item, idx) => `<div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full focus:ring-0"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs hover:text-red-400">×</button></div>`).join(''); 
-            }); 
+            const riskProj = state.projects.find(p => p.id === 'risk');
+            const sbRisks = document.getElementById('sidebar-risks-content');
+            if(sbRisks && riskProj) { sbRisks.innerHTML = riskProj.actions.filter(a => !a.done).map(a => `<div class="alert-card-sidebar" style="border-left-color: #ff7eb3"><p class="text-white text-xs text-white">${a.text}</p></div>`).join('') || '<p class="text-white/20 text-[10px]">Tudo OK.</p>'; }
         }
 
-        function renderAll() {
-            const view = state.activeView;
-            if(view === 'daily') loadDay(state.currentDateStr);
-            if(view === 'projects') renderProj();
-            if(view === 'monthly') renderMonthly();
-            if(view === 'contexts') initContexts();
-            if(view === 'dump') {
-                document.getElementById('brain-dump-text').value = state.dump || "";
-                renderDumpHistory();
+        // AGENDA
+        function renderMonthly() {
+            const grid = document.getElementById('month-grid');
+            const title = document.getElementById('month-title');
+            if(!grid || !title) return;
+            grid.innerHTML = "";
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            title.innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+            const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
+            const lastDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+            const todayISO = getLocalTodayISO();
+
+            for (let i = 0; i < 42; i++) {
+                const dayNum = i - firstDay + 1;
+                const cell = document.createElement('div');
+                cell.className = "aspect-square glass-panel p-1 flex flex-col border border-white/5 relative cursor-pointer hover:bg-white/5 transition-all";
+                if (dayNum > 0 && dayNum <= lastDate) {
+                    const currentISO = `${viewDate.getFullYear()}-${(viewDate.getMonth()+1).toString().padStart(2,'0')}-${dayNum.toString().padStart(2,'0')}`;
+                    cell.onclick = () => addEventPrompt(currentISO);
+                    cell.innerHTML = `<div class="calendar-day-num text-[10px] mb-1 ${currentISO === todayISO ? 'text-primary' : 'opacity-40'}">${dayNum}</div><div class="flex-1 overflow-y-auto hide-scrollbar space-y-1"></div>`;
+                    state.events.filter(e => e.date === currentISO).forEach(ev => {
+                        const item = document.createElement('div');
+                        item.className = `${ev.alert ? 'bg-pink-500/30 border-pink-500/40' : 'bg-primary/20 border-primary/20'} text-[8px] p-1 rounded border flex justify-between items-center`;
+                        item.innerHTML = `<span class="truncate pr-1 text-white flex items-center gap-1">${ev.alert ? '<span class="material-symbols-outlined text-[10px] text-pink-400">notifications_active</span>' : ''}${ev.desc}</span><button onclick="event.stopPropagation(); deleteEvent(${ev.id})" class="material-symbols-outlined text-[10px] opacity-40 hover:opacity-100">delete</button>`;
+                        cell.querySelector('div:last-child').appendChild(item);
+                    });
+                } else { cell.classList.add('opacity-0'); cell.style.pointerEvents = 'none'; }
+                grid.appendChild(cell);
             }
-            updateRadar();
         }
+        function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderMonthly(); }
+        function addEventPrompt(date) {
+            const desc = prompt("Evento para o dia?");
+            if(!desc) return;
+            const isAlert = confirm("Marcar como ALERTA no Status Global?");
+            state.events.push({ id: Date.now(), date, desc, alert: isAlert });
+            saveState(); renderMonthly();
+        }
+        function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderMonthly(); }
 
+        // GTD CONTEXTS
+        function initContexts() { ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { const el = document.getElementById('ctx-'+k); if(!el) return; el.innerHTML = (state.contexts[k] || []).map((item, idx) => `<div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="text-white/20 text-xs">×</button></div>`).join(''); }); }
         function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
         function updateContextItem(k, idx, val) { state.contexts[k][idx].text = val; saveState(); }
         function toggleContextCheck(k, idx) { state.contexts[k][idx].done = !state.contexts[k][idx].done; saveState(); initContexts(); }
         function deleteContextItem(k, idx) { state.contexts[k].splice(idx, 1); saveState(); initContexts(); }
         function clearDoneContexts() { Object.keys(state.contexts).forEach(k => state.contexts[k] = state.contexts[k].filter(i => !i.done)); saveState(); initContexts(); }
-        function togglePriority(n) { const log = ensureLog(state.currentDateStr); log['p'+n+'_done'] = !log['p'+n+'_done']; saveState(); loadDay(state.currentDateStr); }
-        function updatePriorityText(n, val) { const log = ensureLog(state.currentDateStr); log['p'+n] = val; saveState(); }
-        function updateTimelineText(time, val) { const log = ensureLog(state.currentDateStr); log.timeline[time] = val; saveState(); }
-        function updateDumpText(v) { state.dump = v; saveState(); }
-        function changeDay(delta) { const d = new Date(state.currentDateStr + "T12:00:00"); d.setDate(d.getDate() + delta); state.currentDateStr = d.toISOString().split('T')[0]; renderAll(); saveState(); }
-        function loadDayFromInput() { loadDay(document.getElementById('daily-date').value); }
-        function resetDaily() { if(confirm("Limpar dia?")) { state.dailyLogs[state.currentDateStr] = null; saveState(); renderAll(); } }
-        function addEventPrompt(date = null) { const d = date || prompt("AAAA-MM-DD"); const t = prompt("Evento:"); if(d && t) { state.events.push({date: d, desc: t, id: Date.now()}); saveState(); renderAll(); } }
-        function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderAll(); }
-        function closeModal() { document.getElementById('modal').classList.replace('hidden', 'flex'); }
-        function generateScreenshot() { const area = document.getElementById('main-scroll-area'); html2canvas(area, { scale: 2, backgroundColor: "#191022", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
 
-        window.onload = () => { checkSession(); window.addEventListener('resize', () => { if(state) resizeCanvas(); }); };
+        function renderAll() {
+            if(!state) return;
+            const view = state.activeView;
+            if(view === 'daily') loadDay(state.currentDateStr);
+            if(view === 'projects') renderProj();
+            if(view === 'monthly') renderMonthly();
+            if(view === 'contexts') initContexts();
+            if(view === 'dump') { document.getElementById('brain-dump-text').value = state.dump || ""; renderDumpHistory(); }
+            updateRadar();
+        }
+
+        function generateScreenshot() { const area = document.getElementById('main-scroll-area'); html2canvas(area, { scale: 2, backgroundColor: "#191022", useCORS: true }).then(res => { document.getElementById('img-preview').src = res.toDataURL(); document.getElementById('dl-link').href = res.toDataURL(); document.getElementById('modal').classList.replace('hidden', 'flex'); }); }
+        function closeModal() { document.getElementById('modal').classList.replace('flex', 'hidden'); }
+
+        window.onload = () => { checkSession(); window.addEventListener('resize', () => { if(state) renderProj(); }); };
     </script>
 </body>
 </html>
