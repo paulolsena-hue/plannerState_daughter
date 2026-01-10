@@ -118,7 +118,7 @@
             position: fixed; inset: 0; background: var(--bg-color); z-index: 2000;
             display: flex; align-items: center; justify-content: center; padding: 20px;
         }
-        .auth-card { width: 100%; max-width: 400px; padding: 40px; border-radius: 32px; }
+        .auth-card { width: 100%; max-width: 400px; padding: 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
 
         #sync-indicator {
             position: fixed; top: 20px; right: 20px; z-index: 3000; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -151,12 +151,12 @@
         
         <div class="auth-card glass-panel relative z-10 text-center">
             <div class="mb-8 text-center">
-                <!-- Logotipo Lótus Corrigido -->
-                <div class="h-20 w-20 ring-2 ring-primary/50 shadow-xl mx-auto mb-4 bg-background-dark/50 backdrop-blur-md rounded-full overflow-hidden flex items-center justify-center p-2">
-                    <img src="https://api.iconify.design/solar:lotus-bold-duotone.svg?color=%238c2bee" class="logo-img" alt="Lótus"/>
+                <!-- Logotipo Folha Minimalista Duotone -->
+                <div class="h-24 w-24 ring-2 ring-primary/50 shadow-xl mx-auto mb-4 bg-background-dark/50 backdrop-blur-md rounded-full overflow-hidden flex items-center justify-center p-3">
+                    <img src="https://api.iconify.design/solar:leaf-bold-duotone.svg?color=%238c2bee" class="logo-img" alt="Logotipo Folha"/>
                 </div>
                 <h2 class="text-2xl font-bold tracking-tight mb-2" style="color: var(--text-color)">Planner OS</h2>
-                <p class="text-sm opacity-40" style="color: var(--text-color)" id="auth-subtitle">Sincronize o seu foco na nuvem</p>
+                <p class="text-sm opacity-40 font-bold tracking-widest uppercase" style="color: var(--text-color)" id="auth-subtitle">Foco</p>
             </div>
 
             <div class="space-y-4" id="auth-form">
@@ -210,16 +210,16 @@
             <div class="flex gap-4 items-center">
                 <div class="relative">
                     <button onclick="toggleSidebar()" class="absolute -top-1 -left-1 z-10 bg-primary h-6 w-6 rounded-full flex items-center justify-center border-2 border-background-dark shadow-lg transition-transform active:scale-90"><span class="material-symbols-outlined text-[14px] text-white">menu</span></button>
-                    <!-- Logotipo Lótus Corrigido no Header -->
+                    <!-- Logotipo Folha no Header -->
                     <div class="h-14 w-14 ring-2 ring-primary/50 shadow-lg bg-background-dark/50 backdrop-blur-md rounded-full overflow-hidden flex items-center justify-center p-2">
-                        <img src="https://api.iconify.design/solar:lotus-bold-duotone.svg?color=%238c2bee" class="logo-img" alt="Lótus"/>
+                        <img src="https://api.iconify.design/solar:leaf-bold-duotone.svg?color=%238c2bee" class="logo-img" alt="Folha"/>
                     </div>
                 </div>
                 <div><p class="text-xs font-medium tracking-wider uppercase opacity-60" style="color: var(--text-color)" id="header-day-label">CARREGANDO...</p><p class="text-xl font-bold leading-tight" style="color: var(--text-color)">Planner OS</p></div>
             </div>
             <div class="flex items-center gap-2">
-                <!-- Seletor de Tema -->
-                <button onclick="toggleTheme()" class="theme-toggle-btn glass-panel transition-all hover:scale-110 active:scale-95" title="Mudar Tema">
+                <!-- Alternador de Tema -->
+                <button onclick="toggleTheme()" class="theme-toggle-btn glass-panel transition-all hover:scale-110 active:scale-95" title="Alternar Tema">
                     <span class="material-symbols-outlined text-primary" id="theme-icon">dark_mode</span>
                 </button>
                 <button onclick="toggleBottomNav()" class="glass-panel p-3 rounded-full transition-all hover:bg-white/10 ring-1 ring-white/5"><span class="material-symbols-outlined" style="color: var(--text-color)" id="nav-toggle-icon">visibility</span></button>
@@ -245,10 +245,10 @@
                             <input type="date" id="daily-date" class="bg-transparent border-none text-[10px] font-bold p-0" style="color: var(--text-color)" onchange="loadDayFromInput()"/>
                             <button onclick="changeDay(1)" class="material-symbols-outlined text-sm" style="color: var(--text-color)">chevron_right</button>
                         </div>
-                        <button onclick="resetDaily()" class="text-[9px] font-bold text-rose-400 uppercase tracking-widest hover:opacity-70">🗑️ Reset Day</button>
+                        <button onclick="resetDaily()" class="text-[9px] font-bold text-rose-400 uppercase tracking-widest hover:opacity-70">🗑️ Reiniciar Dia</button>
                     </div>
                     <section><h3 class="text-base font-bold flex items-center gap-2 mb-4" style="color: var(--text-color)"><span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-primary to-pink-500 block"></span> Prioridades de Hoje</h3><div class="flex flex-col gap-3" id="daily-priorities"></div></section>
-                    <section><div class="flex justify-between items-center mb-4"><h3 class="text-base font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-blue-500 to-cyan-400 block"></span> Cronograma Dinâmico</h3><button onclick="addTimelineSlotPrompt()" class="bg-primary/20 text-primary text-[9px] px-4 py-1.5 rounded-full font-black border border-primary/30 uppercase tracking-widest transition-all hover:bg-primary/40">+ Add Task</button></div><div class="relative pl-4 border-l border-primary/20 space-y-6" id="daily-flow"></div></section>
+                    <section><div class="flex justify-between items-center mb-4"><h3 class="text-base font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-5 rounded-full bg-gradient-to-b from-blue-500 to-cyan-400 block"></span> Cronograma Dinâmico</h3><button onclick="addTimelineSlotPrompt()" class="bg-primary/20 text-primary text-[9px] px-4 py-1.5 rounded-full font-black border border-primary/30 uppercase tracking-widest transition-all hover:bg-primary/40">+ Adicionar Task</button></div><div class="relative pl-4 border-l border-primary/20 space-y-6" id="daily-flow"></div></section>
                 </div>
 
                 <!-- VIEW: CONTEXTS -->
@@ -263,7 +263,7 @@
                 </div>
 
                 <!-- VIEW: PROJECTS -->
-                <div id="view-projects" class="view-content space-y-8 relative z-10 text-white"><h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 block"></span> Roadmap 2026</h3><div id="projects-list" class="space-y-3"></div><button onclick="addNewProject()" class="w-full py-4 rounded-2xl border border-dashed border-primary/30 text-primary text-xs font-bold hover:bg-primary/5 transition-all uppercase tracking-widest">+ New Objective</button></div>
+                <div id="view-projects" class="view-content space-y-8 relative z-10 text-white"><h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-color)"><span class="w-1.5 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-orange-500 block"></span> Roadmap 2026</h3><div id="projects-list" class="space-y-3"></div><button onclick="addNewProject()" class="w-full py-4 rounded-2xl border border-dashed border-primary/30 text-primary text-xs font-bold hover:bg-primary/5 transition-all uppercase tracking-widest">+ Novo Objetivo</button></div>
 
                 <!-- VIEW: BRAIN DUMP -->
                 <div id="view-dump" class="view-content relative z-10 text-white">
@@ -316,7 +316,7 @@
             <h3 class="text-white text-xl font-bold mb-2">Export Concluído</h3>
             <img id="img-preview" class="w-full rounded-2xl border border-white/5 mb-8" src=""/>
             <div class="flex gap-4 w-full">
-                <a id="dl-link" download="planner.png" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold text-center">Salvar Imagem</a>
+                <a id="dl-link" download="planner.png" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold text-center">Salvar Image</a>
                 <button onclick="closeModal()" class="px-8 bg-white/5 text-white rounded-2xl font-bold">Fechar</button>
             </div>
         </div>
@@ -436,9 +436,9 @@
 
         // BRAIN DUMP
         function updateDumpText(v) { state.dump = v; saveState(); }
-        function clearDump() { if(confirm("Limpar?")) { state.dump = ""; document.getElementById('brain-dump-text').value = ""; saveState(); } }
+        function clearDump() { if(confirm("Limpar anotação atual?")) { state.dump = ""; document.getElementById('brain-dump-text').value = ""; saveState(); } }
         function archiveDump() { if(!state.dump) return; state.dumpHistory.unshift({ id: Date.now(), text: state.dump, time: new Date().toLocaleString('pt-BR') }); state.dump = ""; document.getElementById('brain-dump-text').value = ""; saveState(); renderDumpHistory(); }
-        function deleteHistoryItem(id) { state.dumpHistory = state.dumpHistory.filter(h => h.id !== id); saveState(); renderDumpHistory(); }
+        function deleteHistoryItem(id) { if(confirm("Apagar registo?")) { state.dumpHistory = state.dumpHistory.filter(h => h.id !== id); saveState(); renderDumpHistory(); } }
         function renderDumpHistory() { const list = document.getElementById('dump-history-list'); if(!list) return; list.innerHTML = (state.dumpHistory || []).map(h => `<div class="glass-panel p-4 rounded-2xl border border-white/5 group relative"><div class="flex justify-between items-start mb-2"><span class="text-[9px] font-black text-primary uppercase tracking-widest">${h.time}</span><button onclick="deleteHistoryItem(${h.id})" class="material-symbols-outlined text-[16px] opacity-40 hover:opacity-100 transition-all" style="color: var(--text-color)">delete</button></div><p class="text-xs opacity-70 whitespace-pre-wrap" style="color: var(--text-color)">${h.text}</p></div>`).join('') || '<p class="text-white/20 text-[10px] text-center">Vazio.</p>'; }
 
         // ROADMAP
@@ -455,8 +455,8 @@
         function updatePhaseText(idx, pIdx, val) { const p = state.projects.find(p => p.id === 'risk'); if(p) p.actions[idx].phases[pIdx].text = val; saveState(); }
         function togglePhase(idx, pIdx) { const p = state.projects.find(p => p.id === 'risk'); if(p) { const ph = p.actions[idx].phases[pIdx]; ph.done = !ph.done; saveState(); renderProj(); } }
 
-        // DAILY
-        function ensureLog(dateStr) { if (!state.dailyLogs[dateStr]) { state.dailyLogs[dateStr] = { p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false, timeline: { "08:00": "Acordar", "10:00": "Foco", "13:00": "Almoço", "15:00": "Revisão", "18:00": "Lazer", "20:00": "Jantar", "22:00": "Planejamento", "23:00": "Descanso" } }; } return state.dailyLogs[dateStr]; }
+        // Daily
+        function ensureLog(dateStr) { if (!state.dailyLogs[dateStr]) { state.dailyLogs[dateStr] = { p1: "", p1_done: false, p2: "", p2_done: false, p3: "", p3_done: false, timeline: { "08:00": "Acordar", "10:00": "Foco", "13:00": "Almoço", "15:00": "Revisão", "18:00": "Lazer", "20:00": "Jantar", "22:00": "Planeamento", "23:00": "Descanso" } }; } return state.dailyLogs[dateStr]; }
         function loadDay(dateStr) { state.currentDateStr = dateStr; const log = ensureLog(dateStr); document.getElementById('daily-priorities').innerHTML = [1,2,3].map(n => `<div class="group flex items-center gap-3 p-4 glass-panel rounded-2xl ring-1 ring-white/5 transition-all"><input type="checkbox" ${log['p'+n+'_done'] ? 'checked' : ''} onchange="togglePriority(${n})" class="h-5 w-5 text-primary rounded-full"/><input type="text" class="dash-input text-sm flex-1 text-white ${log['p'+n+'_done'] ? 'line-through opacity-40' : ''}" value="${log['p'+n] || ''}" placeholder="Prioridade ${n}..." oninput="updatePriorityText(${n}, this.value)"/></div>`).join(''); const sortedTimes = Object.keys(log.timeline).sort(); document.getElementById('daily-flow').innerHTML = sortedTimes.map(time => `<div class="relative group flex gap-4"><div class="absolute -left-[21px] top-0 h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0:10px_#8c2bee]"></div><span class="text-[10px] text-primary font-bold w-12 font-mono pt-1 text-white">${time}</span><div class="flex-1 glass-panel rounded-2xl p-3 border-l-2 border-primary flex items-center gap-2"><input type="text" class="dash-input text-sm flex-1 text-white" value="${log.timeline[time]}" oninput="updateTimelineText('${time}', this.value)"/><button onclick="deleteTimelineSlot('${time}')" class="material-symbols-outlined text-[18px] opacity-30 hover:text-red-400" style="color: var(--text-color)">delete</button></div></div>`).join(''); document.getElementById('header-day-label').innerText = new Date(dateStr + "T12:00:00").toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase(); document.getElementById('daily-date').value = dateStr; }
         function updatePriorityText(n, v) { ensureLog(state.currentDateStr)['p'+n] = v; saveState(); }
         function togglePriority(n) { const l = ensureLog(state.currentDateStr); l['p'+n+'_done'] = !l['p'+n+'_done']; saveState(); loadDay(state.currentDateStr); }
@@ -466,7 +466,7 @@
         function loadDayFromInput() { loadDay(document.getElementById('daily-date').value); }
         function resetDaily() { if(confirm("Limpar dia?")) { state.dailyLogs[state.currentDateStr] = null; saveState(); renderAll(); } }
 
-        // RADAR & SIDEBAR
+        // Radar e Sidebar
         function updateRadar() {
             if(!state) return;
             const log = ensureLog(state.currentDateStr);
@@ -486,10 +486,10 @@
 
             const riskProj = state.projects.find(p => p.id === 'risk');
             const sbRisks = document.getElementById('sidebar-risks-content');
-            if(sbRisks && riskProj) { sbRisks.innerHTML = (riskProj.actions || []).filter(a => !a.done).map(a => `<div class="alert-card-sidebar" style="border-left-color: #ff7eb3"><p class="text-xs" style="color: var(--text-color)">${a.text}</p></div>`).join('') || '<p class="text-[10px] opacity-30" style="color: var(--text-color)">Tudo OK.</p>'; }
+            if(sbRisks && riskProj) { sbRisks.innerHTML = (riskProj.actions || []).filter(a => !a.done).map(a => `<div class="alert-card-sidebar" style="border-left-color: #ff7eb3"><p class="text-xs" style="color: var(--text-color)">${a.text}</p></div>`).join('') || '<p class="text-[10px] opacity-30" style="color: var(--text-color)">Tudo sob controlo.</p>'; }
         }
 
-        // AGENDA
+        // Agenda Mensal
         function renderMonthly() {
             const grid = document.getElementById('month-grid');
             const title = document.getElementById('month-title');
@@ -522,13 +522,13 @@
         function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderMonthly(); }
         function addEventPrompt(date) {
             const desc = prompt("Evento para o dia?"); if(!desc) return;
-            const isAlert = confirm("Marcar como ALERTA no Status Global?");
+            const isAlert = confirm("Deseja marcar como ALERTA no Status Global?");
             state.events.push({ id: Date.now(), date, desc, alert: isAlert });
             saveState(); renderMonthly();
         }
-        function deleteEvent(id) { state.events = state.events.filter(e => e.id !== id); saveState(); renderMonthly(); }
+        function deleteEvent(id) { if(confirm("Apagar evento?")) { state.events = state.events.filter(e => e.id !== id); saveState(); renderMonthly(); } }
 
-        // GTD CONTEXTS
+        // Contextos GTD
         function initContexts() { ['imp_urg', 'imp_not_urg', 'compras', 'casa'].forEach(k => { const el = document.getElementById('ctx-'+k); if(!el) return; el.innerHTML = (state.contexts[k] || []).map((item, idx) => `<div class="flex items-center gap-2 mb-2 p-2 bg-white/5 rounded-xl border border-white/5 transition-all"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleContextCheck('${k}', ${idx})" class="h-4 w-4 border-primary/40 bg-transparent text-primary rounded-full"/><input type="text" class="dash-input text-[11px] flex-1 text-white ${item.done ? 'line-through opacity-30' : ''}" value="${item.text}" oninput="updateContextItem('${k}', ${idx}, this.value)"/><button onclick="deleteContextItem('${k}', ${idx})" class="material-symbols-outlined text-xs opacity-30" style="color: var(--text-color)">close</button></div>`).join(''); }); }
         function addContextItem(k) { state.contexts[k].push({text:"", done:false}); saveState(); initContexts(); }
         function updateContextItem(k, idx, val) { state.contexts[k][idx].text = val; saveState(); }
